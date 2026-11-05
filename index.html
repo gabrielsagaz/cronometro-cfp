@@ -801,7 +801,7 @@ var FigEngine = (function () {
   function unlockScreen() { try { if (wl) wl.release(); } catch (e) {} wl = null; }
 
   /* ---------- Estado ---------- */
-  var view = 'home', curId = null, T = null, timerId = null, confirmQuit = false, from = 'home', cal = null;
+  var view = 'home', curBar = null, curId = null, T = null, timerId = null, confirmQuit = false, from = 'home', cal = null;
   function prog(id) { return PROGRAMS.filter(function (p) { return p.id === id; })[0]; }
 
   function el(html) { app.innerHTML = html; try { FigEngine.mount(app); FigEngine.setPaused(view === 'timer' && !!T && !T.running); } catch (e) {} }
@@ -904,7 +904,7 @@ var FigEngine = (function () {
 
   /* ---------- Telas: início e programa ---------- */
   function renderHome() {
-    var h = '<div class="wrap"><header class="top"><h1>Cronômetro CFP</h1><p>Condicionamento de quarta. Escolha o programa do seu bloco de semanas e comece.</p></header>' + tabs('home');
+    var h = '<div class="wrap"><header class="top"><h1>Cronômetro CFP</h1><p>Condicionamento de quarta e treinos de barra. Escolha o programa e comece.</p></header>' + tabs('home');
     BLOCKS.forEach(function (b) {
       h += '<section class="group"><h2>Semanas ' + b + '</h2>';
       PROGRAMS.filter(function (p) { return p.semanas === b; }).forEach(function (p) {
@@ -921,7 +921,34 @@ var FigEngine = (function () {
       });
       h += '</section>';
     });
+    h += '<section class="group"><h2>Treinos de barra</h2>';
+    barSessions().forEach(function (g) {
+      h += '<button type="button" class="card" data-act="openbar" data-t="' + esc(g.t) + '">' +
+        '<span class="name">' + esc(g.t) + '<small>Barra</small></span>' +
+        '<span class="chip">' + g.its.length + (g.its.length > 1 ? ' dias' : ' dia') + '</span>' +
+        '<span class="meta">' + g.its.map(function (it) { return shortDate(it.date); }).join(' e ') + '</span></button>';
+    });
+    h += '</section>';
     h += '<p class="hint">Tabata e cronômetro são os modos de cada programa. Os valores seguem o documento do instrutor e podem ser ajustados na tela do programa.</p></div>';
+    el(h);
+  }
+
+  function barSessions() {
+    var order = [], by = {};
+    PLAN.forEach(function (it) { if (it.k !== 'barra') return; if (!by[it.t]) { by[it.t] = { t: it.t, d: it.d, its: [] }; order.push(by[it.t]); } by[it.t].its.push(it); });
+    return order;
+  }
+  function renderBar() {
+    var g = barSessions().filter(function (x) { return x.t === curBar; })[0];
+    if (!g) { view = 'home'; renderHome(); return; }
+    var h = '<div class="wrap"><button type="button" class="back" data-act="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Programas</button>' +
+      '<div class="ptitle"><h1>Treino ' + esc(g.t) + '</h1><div class="chips"><span class="chip">Barra</span><span class="chip">Semana ' + g.its.map(function (it) { return weekOf(it.date); }).filter(function (w, i, ar) { return ar.indexOf(w) === i; }).join(' e ') + '</span></div></div>';
+    h += '<article class="sess barra"><div class="kind">Exercícios</div>' + barList(g.d) + '<div class="btns">';
+    g.its.forEach(function (it) {
+      var dn = !!store.done[it.id];
+      h += '<button type="button" class="mark' + (dn ? ' on' : '') + '" data-act="mark" data-id="' + it.id + '" aria-pressed="' + dn + '"><span class="box" aria-hidden="true">' + (dn ? '✓' : '') + '</span>' + (dn ? 'Feito em ' + shortDate(it.date) + ' · toque para desfazer' : 'Marcar ' + shortDate(it.date) + ' como feito') + '</button>';
+    });
+    h += '</div></article><p class="hint">O descanso de cada exercício está escrito ao lado dele. Use o cronômetro do celular entre as séries.</p></div>';
     el(h);
   }
 
@@ -1155,14 +1182,15 @@ var FigEngine = (function () {
   app.addEventListener('click', function (e) {
     var b = e.target.closest('[data-act]'); if (!b) return;
     var act = b.getAttribute('data-act');
-    if (act === 'open') { curId = b.getAttribute('data-id'); from = b.getAttribute('data-from') || 'home'; view = 'prog'; renderProg(); window.scrollTo(0, 0); }
+    if (act === 'openbar') { curBar = b.getAttribute('data-t'); view = 'bar'; renderBar(); window.scrollTo(0, 0); }
+    else if (act === 'open') { curId = b.getAttribute('data-id'); from = b.getAttribute('data-from') || 'home'; view = 'prog'; renderProg(); window.scrollTo(0, 0); }
     else if (act === 'tab') { stopTimer(); from = 'home'; if (b.getAttribute('data-v') === 'cal') { view = 'cal'; renderCal(); } else { view = 'home'; renderHome(); } window.scrollTo(0, 0); }
     else if (act === 'calnav') { var nm = cal.m + Number(b.getAttribute('data-d')); cal.y += Math.floor(nm / 12); cal.m = ((nm % 12) + 12) % 12; renderCal(); }
     else if (act === 'sel') {
       var sdte = b.getAttribute('data-date'), sdd = parseISO(sdte); cal.sel = sdte; cal.y = sdd.getFullYear(); cal.m = sdd.getMonth(); var sy = window.scrollY; renderCal(); window.scrollTo(0, sy);
       var dpe = document.getElementById('dp'); if (dpe && dpe.scrollIntoView) { try { dpe.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (er) {} }
     }
-    else if (act === 'mark') { var mid = b.getAttribute('data-id'); if (store.done[mid]) delete store.done[mid]; else store.done[mid] = new Date().toISOString(); save(); var my = window.scrollY; renderCal(); window.scrollTo(0, my); }
+    else if (act === 'mark') { var mid = b.getAttribute('data-id'); if (store.done[mid]) delete store.done[mid]; else store.done[mid] = new Date().toISOString(); save(); var my = window.scrollY; if (view === 'bar') renderBar(); else renderCal(); window.scrollTo(0, my); }
     else if (act === 'home') { stopTimer(); view = 'home'; renderHome(); window.scrollTo(0, 0); }
     else if (act === 'step') {
       var p = prog(curId), sp = specs(p).filter(function (x) { return x.key === b.getAttribute('data-key'); })[0];
