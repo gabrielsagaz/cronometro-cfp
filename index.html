@@ -170,6 +170,14 @@ h1, h2, h3, p, ol, ul { margin: 0; }
 :root[data-theme="dark"] .mark.on { color: #0B1013; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mark.on { color: #0B1013; } }
 .mark.on .box { background: #fff; color: var(--c); border-color: #fff; }
+.pick { display: grid; gap: 6px; }
+.pick .pl { font-size: 14px; color: var(--muted); }
+.pick .pb { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pk { min-height: 56px; border-radius: 10px; border: 2px solid var(--line); background: transparent; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; }
+.pk small { font-size: 12px; font-weight: 500; opacity: .85; }
+.pk[aria-pressed="true"] { background: var(--c); border-color: var(--c); color: #fff; }
+:root[data-theme="dark"] .pk[aria-pressed="true"] { color: #0B1013; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pk[aria-pressed="true"] { color: #0B1013; } }
 .openp { min-height: 44px; width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-weight: 600; }
 .rest { color: var(--muted); }
 
@@ -653,13 +661,14 @@ var FigEngine = (function () {
   var app = document.getElementById('app');
   var live = document.getElementById('live');
   var KEY = 'cfp-cronometro-v1';
-  var store = { cfg: {}, prefs: { sound: true, voice: true }, done: {} };
+  var store = { cfg: {}, prefs: { sound: true, voice: true }, done: {}, alt: {} };
   try {
     var s0 = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (s0 && typeof s0 === 'object') {
       store.cfg = s0.cfg || {};
       store.prefs = Object.assign(store.prefs, s0.prefs || {});
       store.done = s0.done || {};
+      store.alt = s0.alt || {};
     }
   } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
@@ -821,10 +830,13 @@ var FigEngine = (function () {
   function isoOf(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
   function parseISO(s) { var a = s.split('-'); return new Date(Number(a[0]), Number(a[1]) - 1, Number(a[2])); }
   function shortDate(s) { var d = parseISO(s); return DIAS[d.getDay()].slice(0, 3) + ' ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1); }
-  function itemTitle(it) { if (it.k !== 'cond') return it.t; var p = prog(it.pr); return 'Programa ' + p.num + ' · ' + p.tipo; }
+  /* Condicionamento: um programa por dia. O app sugere um, mas dá para escolher o outro do mesmo bloco. */
+  var BLOCK_OF = { p1: ['p1', 'p2'], p2: ['p1', 'p2'], p6: ['p6', 'p3c'], p3c: ['p6', 'p3c'], p5: ['p5', 'p3a'], p3a: ['p5', 'p3a'] };
+  function effPr(it) { var a = store.alt && store.alt[it.date]; return a && BLOCK_OF[it.pr].indexOf(a) >= 0 ? a : it.pr; }
+  function itemTitle(it) { if (it.k !== 'cond') return it.t; var p = prog(effPr(it)); return 'Programa ' + p.num + ' · ' + p.tipo; }
   function itemDetail(it) {
     if (it.k !== 'cond') return it.d;
-    var p = prog(it.pr), c = getCfg(p);
+    var p = prog(effPr(it)), c = getCfg(p);
     return p.items.map(function (x) { return x.t; }).join(' · ');
   }
   /* Treino de barra: cada exercício da prescrição ganha a figura animada correspondente */
@@ -864,6 +876,14 @@ var FigEngine = (function () {
       return '<li' + (ks.length ? '' : ' class="nofig"') + '>' + (ks.length ? '<span class="ths">' + ks.map(function (k) { return '<span class="th" data-fig="' + k + '" role="img" aria-label="' + esc(FIGS[k].nome) + '"></span>'; }).join('') + '</span>' : '') +
         '<span class="tx">' + esc(main) + rs + (tip ? '<small>' + esc(tip) + '</small>' : '') + '</span></li>';
     }).join('') + '</ul>';
+  }
+  function pickHtml(it) {
+    var cur = effPr(it);
+    return '<div class="pick" role="group" aria-label="Escolher o programa do dia"><span class="pl">Faça um dos dois hoje. Toque para escolher:</span><div class="pb">' +
+      BLOCK_OF[it.pr].map(function (id) {
+        var p = prog(id);
+        return '<button type="button" class="pk" data-act="pick" data-date="' + it.date + '" data-pr="' + id + '" aria-pressed="' + (id === cur) + '">Programa ' + p.num + '<small>' + p.tipo + (id === it.pr ? ' · previsto' : '') + '</small></button>';
+      }).join('') + '</div></div>';
   }
   function weekOf(s) { return Math.floor((parseISO(s) - parseISO(PLAN[0].date)) / 604800000) + 1; }
 
@@ -916,9 +936,9 @@ var FigEngine = (function () {
     if (!its2.length) h += '<p class="rest" style="margin-top:8px">' + (sd.getDay() === 0 ? 'Domingo é dia de descanso.' : inPlan ? 'Sem treino previsto neste dia.' : 'Fora do cronograma.') + '</p>';
     its2.forEach(function (it) {
       var dn = !!store.done[it.id];
-      h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4>' + (it.k === 'barra' ? barList(it.d, it.t) : '<p>' + esc(itemDetail(it)) + '</p>') + '<div class="btns">' +
+      h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4>' + (it.k === 'cond' ? pickHtml(it) : '') + (it.k === 'barra' ? barList(it.d, it.t) : '<p>' + esc(itemDetail(it)) + '</p>') + '<div class="btns">' +
         '<button type="button" class="mark' + (dn ? ' on' : '') + '" data-act="mark" data-id="' + it.id + '" aria-pressed="' + dn + '"><span class="box" aria-hidden="true">' + (dn ? '✓' : '') + '</span>' + (dn ? 'Feito · toque para desfazer' : 'Marcar como feito') + '</button>' +
-        (it.k === 'cond' ? '<button type="button" class="openp" data-act="open" data-from="cal" data-id="' + it.pr + '">Abrir programa e cronômetro</button>' : '') +
+        (it.k === 'cond' ? '<button type="button" class="openp" data-act="open" data-from="cal" data-id="' + effPr(it) + '">Abrir programa e cronômetro</button>' : '') +
         (it.k === 'barra' ? '<button type="button" class="openp" data-act="openbar" data-from="cal" data-t="' + esc(it.t) + '">Abrir treino e cronômetro</button>' : '') + '</div></article>';
     });
     h += '</section></div>';
@@ -1102,14 +1122,14 @@ var FigEngine = (function () {
     beep(784, 0.18); beep(988, 0.18, 0.22); beep(1318, 0.45, 0.44); buzz([300, 100, 300]);
     speak('Treino concluído');
     T.calMsg = '';
-    var tdIso = isoOf(new Date()), hit = null, mine = PLAN.filter(function (it) { return it.pr === T.p.id; });
+    var tdIso = isoOf(new Date()), hit = null, mine = PLAN.filter(function (it) { return it.k === 'cond' && BLOCK_OF[it.pr].indexOf(T.p.id) >= 0; });
     var todays = mine.filter(function (it) { return it.date === tdIso; })[0];
     if (todays) { if (store.done[todays.id]) T.calMsg = 'Hoje já estava marcado no calendário'; else hit = todays; }
     else {
       var pend = mine.filter(function (it) { return !store.done[it.id]; });
       hit = pend.filter(function (it) { return it.date < tdIso; })[0] || pend.filter(function (it) { return it.date > tdIso; })[0] || null;
     }
-    if (hit) { store.done[hit.id] = new Date().toISOString(); save(); T.calMsg = '✓ Marcado no calendário: ' + shortDate(hit.date); var hd = parseISO(hit.date); cal = { y: hd.getFullYear(), m: hd.getMonth(), sel: hit.date }; }
+    if (hit) { store.done[hit.id] = new Date().toISOString(); if (effPr(hit) !== T.p.id) { if (T.p.id === hit.pr) delete store.alt[hit.date]; else store.alt[hit.date] = T.p.id; } save(); T.calMsg = '✓ Marcado no calendário: ' + shortDate(hit.date); var hd = parseISO(hit.date); cal = { y: hd.getFullYear(), m: hd.getMonth(), sel: hit.date }; }
     view = 'done'; confirmQuit = false;
     renderDone();
   }
@@ -1365,6 +1385,7 @@ var FigEngine = (function () {
     var b = e.target.closest('[data-act]'); if (!b) return;
     var act = b.getAttribute('data-act');
     if (act === 'openbar') { curBar = b.getAttribute('data-t'); from = b.getAttribute('data-from') || 'home'; view = 'bar'; renderBar(); window.scrollTo(0, 0); }
+    else if (act === 'pick') { var pd = b.getAttribute('data-date'), pp = b.getAttribute('data-pr'), pit = (PLAN_BY[pd] || []).filter(function (x) { return x.k === 'cond'; })[0]; if (pit) { if (pp === pit.pr) delete store.alt[pd]; else store.alt[pd] = pp; save(); var py = window.scrollY; renderCal(); window.scrollTo(0, py); } }
     else if (act === 'bstart') startBar();
     else if (act === 'bdone') { beep(1000, 0.08); buzz([30]); bAdvance(0); }
     else if (act === 'bpause') bToggle();
