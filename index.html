@@ -388,7 +388,7 @@ FIGS.roscaB.prop = function (q) {
     { a: [hx, hy - 6.5, 14], b: [hx, hy + 6.5, 14], t: 'plate' }, { a: [hx, hy - 5, 17.5], b: [hx, hy + 5, 17.5], t: 'plate' }];
 };
 FIGS.roscaB.propN = 5;
-FIGS.barra.dica = 'Pegada pronada, mãos na largura dos ombros: sobe até o queixo passar da barra e desce controlando.';
+FIGS.barra.dica = 'Sobe até o queixo passar da barra e desce controlando.';
 FIGS.isom.dica = 'Fica parado com o queixo acima da barra pelo tempo prescrito.';
 FIGS.negativa.dica = 'Sobe no banco até o queixo passar da barra, solta os pés e desce devagar (3 a 5 s) até esticar os braços.';
 FIGS.assist.dica = 'Elástico preso na barra e sob os pés: ele ajuda a subir. Mesmo movimento da barra.';
@@ -840,11 +840,28 @@ var FigEngine = (function () {
     return [];
   }
   function tidy(x) { return x.replace(/(\S)\(/g, '$1 (').replace(/\)(?=[A-Za-zÀ-ú])/g, ') ').replace(/\s+/g, ' ').trim(); }
-  function barList(d) {
-    return '<ul class="exl">' + d.split(' · ').map(function (part) {
-      var ks = barFigs(part), tip = ks.length ? FIGS[ks[0]].dica || '' : '', i = part.indexOf('/'), main = i < 0 ? part : part.slice(0, i), rest = i < 0 ? '' : part.slice(i + 1);
+  function fsec(n) { return n >= 120 && n % 60 === 0 ? (n / 60) + ' min' : n === 60 ? '1 min' : n + ' s'; }
+  function segShort(x) { return /^Máximo/.test(x) ? 'Máx.' : /do máximo$/.test(x) ? x.replace(' do máximo', '') : x.replace(' repetições', ''); }
+  function barRow(part, e, isLast) {
+    var m = part.match(/\(((?:Alt\.|Aument)[^)]*)\)/), note = m ? m[1] : '', lines = [];
+    var name = e.sets + '× ' + e.n + (e.iso ? ' (ou isometria)' : '');
+    if (e.timed) lines.push('1 min por série: ' + (e.segs[0] || ''));
+    else if (e.segs.length > 1) lines.push(e.segs.map(segShort).join(' + ') + (e.segs.every(function (x) { return /^\d+ repetições$/.test(x); }) ? ' repetições' : ''));
+    else if (e.segs[0]) lines.push(e.segs[0]);
+    if (e.intra) lines.push('Intervalo de ' + fsec(e.intra) + ' entre as partes');
+    if (e.rest > 0 && !(isLast && e.sets === 1)) lines.push('Descanso de ' + fsec(e.rest) + (e.sets > 1 ? ' entre as séries' : ' depois') + (e.restDef ? ' (padrão do app)' : ''));
+    if (note) lines.push(note.replace(/^Alt\./, 'Alt.').replace(/Elastico/, 'Elástico'));
+    if (e.blocos) lines.push('Divida em blocos');
+    return { name: name, lines: lines };
+  }
+  function barList(d, t) {
+    var ex = BAR_EX[t] || [], real = ex.filter(function (e) { return !e.mob; });
+    return '<ul class="exl">' + d.split(' · ').map(function (part, idx) {
+      var e = ex[idx], ks = barFigs(part), tip = ks.length ? FIGS[ks[0]].dica || '' : '', main, rs = '';
+      if (e && !e.mob) { var r = barRow(part, e, real.indexOf(e) === real.length - 1); main = r.name; rs = r.lines.map(function (l) { return '<small class="rs">' + esc(l) + '</small>'; }).join(''); }
+      else main = part;
       return '<li' + (ks.length ? '' : ' class="nofig"') + '>' + (ks.length ? '<span class="ths">' + ks.map(function (k) { return '<span class="th" data-fig="' + k + '" role="img" aria-label="' + esc(FIGS[k].nome) + '"></span>'; }).join('') + '</span>' : '') +
-        '<span class="tx">' + esc(tidy(main)) + (rest ? '<small class="rs">' + esc(tidy(rest)) + '</small>' : '') + (tip ? '<small>' + esc(tip) + '</small>' : '') + '</span></li>';
+        '<span class="tx">' + esc(main) + rs + (tip ? '<small>' + esc(tip) + '</small>' : '') + '</span></li>';
     }).join('') + '</ul>';
   }
   function weekOf(s) { return Math.floor((parseISO(s) - parseISO(PLAN[0].date)) / 604800000) + 1; }
@@ -898,7 +915,7 @@ var FigEngine = (function () {
     if (!its2.length) h += '<p class="rest" style="margin-top:8px">' + (sd.getDay() === 0 ? 'Domingo é dia de descanso.' : inPlan ? 'Sem treino previsto neste dia.' : 'Fora do cronograma.') + '</p>';
     its2.forEach(function (it) {
       var dn = !!store.done[it.id];
-      h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4>' + (it.k === 'barra' ? barList(it.d) : '<p>' + esc(itemDetail(it)) + '</p>') + '<div class="btns">' +
+      h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4>' + (it.k === 'barra' ? barList(it.d, it.t) : '<p>' + esc(itemDetail(it)) + '</p>') + '<div class="btns">' +
         '<button type="button" class="mark' + (dn ? ' on' : '') + '" data-act="mark" data-id="' + it.id + '" aria-pressed="' + dn + '"><span class="box" aria-hidden="true">' + (dn ? '✓' : '') + '</span>' + (dn ? 'Feito · toque para desfazer' : 'Marcar como feito') + '</button>' +
         (it.k === 'cond' ? '<button type="button" class="openp" data-act="open" data-from="cal" data-id="' + it.pr + '">Abrir programa e cronômetro</button>' : '') +
         (it.k === 'barra' ? '<button type="button" class="openp" data-act="openbar" data-from="cal" data-t="' + esc(it.t) + '">Abrir treino e cronômetro</button>' : '') + '</div></article>';
@@ -948,7 +965,7 @@ var FigEngine = (function () {
     if (!g) { view = 'home'; renderHome(); return; }
     var h = '<div class="wrap"><button type="button" class="back" data-act="' + (from === 'cal' ? 'tab' : 'home') + '"' + (from === 'cal' ? ' data-v="cal"' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>' + (from === 'cal' ? 'Calendário' : 'Programas') + '</button>' +
       '<div class="ptitle"><h1>Treino ' + esc(g.t) + '</h1><div class="chips"><span class="chip">Barra</span><span class="chip">Semana ' + g.its.map(function (it) { return weekOf(it.date); }).filter(function (w, i, ar) { return ar.indexOf(w) === i; }).join(' e ') + '</span></div></div>';
-    h += '<article class="sess barra"><div class="kind">Exercícios</div>' + barList(g.d) + '<div class="btns">';
+    h += '<article class="sess barra"><div class="kind">Exercícios</div>' + barList(g.d, g.t) + '<div class="btns">';
     g.its.forEach(function (it) {
       var dn = !!store.done[it.id];
       h += '<button type="button" class="mark' + (dn ? ' on' : '') + '" data-act="mark" data-id="' + it.id + '" aria-pressed="' + dn + '"><span class="box" aria-hidden="true">' + (dn ? '✓' : '') + '</span>' + (dn ? 'Feito em ' + shortDate(it.date) + ' · toque para desfazer' : 'Marcar ' + shortDate(it.date) + ' como feito') + '</button>';
