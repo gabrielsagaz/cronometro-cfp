@@ -160,6 +160,9 @@ h1, h2, h3, p, ol, ul { margin: 0; }
 .exl .tx { font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--ink); }
 .exl .tx small { display: block; margin-top: 2px; font-size: 13px; font-weight: 400; line-height: 1.3; color: var(--muted); }
 .exl .tx small.rs { margin-top: 1px; font-size: 14px; font-weight: 500; color: var(--ink); opacity: .75; }
+.target { font-family: var(--display); font-weight: 700; font-size: clamp(24px, 7.5vw, 38px); line-height: 1.05; background: rgba(255,255,255,.2); border-radius: 12px; padding: 4px 14px; text-wrap: balance; }
+.binfo { font-size: 15px; opacity: .92; max-width: 34ch; text-wrap: balance; }
+.figbig.mob { display: grid; place-items: center; font-size: 56px; }
 .exl li.nofig { padding-left: 2px; }
 .mark { min-height: 50px; width: 100%; border-radius: 10px; border: 2px solid var(--c); background: transparent; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .mark .box { width: 24px; height: 24px; border-radius: 7px; border: 2.5px solid currentColor; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; line-height: 1; }
@@ -809,6 +812,7 @@ var FigEngine = (function () {
 
   /* ---------- Calendário: plano do documento (barra, corrida e condicionamento) ---------- */
   var PLAN = [{"date":"2026-11-02","k":"barra","t":"B10","d":"Mobilidade · 1x Max. Barra/60 seg de descanso · 1x Max. Abdominal Remador"},{"date":"2026-11-03","k":"corrida","t":"Teste 1 km","d":"Teste de 1 km"},{"date":"2026-11-04","k":"cond","t":"","d":"","pr":"p1"},{"date":"2026-11-04","k":"cond","t":"","d":"","pr":"p2"},{"date":"2026-11-05","k":"corrida","t":"Trote 25'","d":"25 min trote (Z1)"},{"date":"2026-11-06","k":"barra","t":"B11","d":"Mobilidade · 4x (Max.+50%+50%+50%) Barra ou Isometria/20'' intra-set · 3x 6 Rosca direta/90seg de descanso · 3x 35-20 Abdominal Remador(20 seg intra-set)"},{"date":"2026-11-07","k":"corrida","t":"8×50 m","d":"10min (Z1) + 8x 50m /2' caminhada +5min (Z1)"},{"date":"2026-11-09","k":"barra","t":"B12","d":"Mobilidade · 1x Max. Barra ou Isometria/60 seg de descanso · 3x 15 Remadas invertidas(Alt. da cintura)/90seg de descanso · 3x 3 Barra negativa/90seg de descanso · 3x 8 Rosca direta/90seg de descanso · 3x 20+15+10(20s intra-set) Abdominal Remador/60seg desc."},{"date":"2026-11-10","k":"corrida","t":"8×1'30 (Z5)","d":"10min (Z1)+8x 1'30 (Z5)/1'30 desc. + 5min (Z1)"},{"date":"2026-11-11","k":"cond","t":"","d":"","pr":"p1"},{"date":"2026-11-11","k":"cond","t":"","d":"","pr":"p2"},{"date":"2026-11-12","k":"corrida","t":"Trote 28'","d":"28 min trote (Z1)"},{"date":"2026-11-13","k":"barra","t":"B13","d":"Mobilidade · 4x Max. Barra/90 seg de descanso · 3x 8 Barras assistidas(Elastico leve)/90seg de descanso · 3x 6 Rosca direta/90seg de descanso(Aumentar carga) · 30+20 (15s intra-set)Abdominal Remador/60seg desc."},{"date":"2026-11-14","k":"corrida","t":"5×80 m","d":"10min (Z1) + 5x 80m /3' (Z1) +5min (Z1)"},{"date":"2026-11-16","k":"barra","t":"B14 (deload)","d":"Mobilidade · 4x 3-6 Barra/45 seg de descanso · 3x 12 Remadas invertidas(Alt. da cintura)/90seg de descanso · 3x 6 Rosca direta/90seg de descanso · 3x 15 Abdominal Remador/15seg desc."},{"date":"2026-11-17","k":"corrida","t":"5×2' (Z5)","d":"10min(Z1)+5x2'(Z5)/2' desc. + 5 min (Z1)"},{"date":"2026-11-18","k":"cond","t":"","d":"","pr":"p1"},{"date":"2026-11-18","k":"cond","t":"","d":"","pr":"p2"},{"date":"2026-11-19","k":"corrida","t":"Trote 30'","d":"30 min trote (Z1)"},{"date":"2026-11-20","k":"barra","t":"B14 (deload)","d":"Mobilidade · 4x 3-6 Barra/45 seg de descanso · 3x 12 Remadas invertidas(Alt. da cintura)/90seg de descanso · 3x 6 Rosca direta/90seg de descanso · 3x 15 Abdominal Remador/15seg desc."},{"date":"2026-11-21","k":"corrida","t":"4×(5 saltos+50 m)","d":"10min (Z1) + 4x 5 saltos + 50m/3' desc. +5min (Z1)"},{"date":"2026-11-23","k":"barra","t":"B15","d":"Mobilidade · 3x 7 Barra /90 seg de descanso · 3x 12 Remadas invertidas(Alt. da cintura)/90seg de descanso · 3x 8 Rosca direta/90seg de descanso · 2x 40 Abdominal Remador/60seg desc."},{"date":"2026-11-24","k":"corrida","t":"6×1' (Z5)","d":"10min(Z1)+6x1'(Z5)/2' desc. + 5 min (Z1)"},{"date":"2026-11-25","k":"cond","t":"","d":"","pr":"p1"},{"date":"2026-11-25","k":"cond","t":"","d":"","pr":"p2"},{"date":"2026-11-26","k":"corrida","t":"Trote 25'","d":"25 min trote (Z1)"},{"date":"2026-11-27","k":"barra","t":"B16","d":"Mobilidade · 4x (Max+Max) Barra (20s intra-set)/90 seg de desc. · 3x 10 Remadas invertida/90seg de descanso · 3x 8 Rosca direta/90seg de descanso · 2x 50 Abdominal Remador/60seg desc."},{"date":"2026-11-28","k":"corrida","t":"100-150-200-150-100 m","d":"10min (Z1) + 100-150-200-150-100(30seg)+5min(Z1)"},{"date":"2026-11-30","k":"barra","t":"B17","d":"Mobilidade · 3x 9 Barra ou 40s de Isometria/90 seg de descanso · 3x 6 Rosca direta/90seg de descanso(Aumentar carga) · 1x 50 Abdominal Remador dividido em blocos"},{"date":"2026-12-01","k":"corrida","t":"8×1' (Z5)","d":"10min (Z1) + 8x 1' (Z5) / 1:30 + 5min (Z1)"},{"date":"2026-12-02","k":"cond","t":"","d":"","pr":"p6"},{"date":"2026-12-02","k":"cond","t":"","d":"","pr":"p3c"},{"date":"2026-12-03","k":"corrida","t":"Trote 28'","d":"28 min trote (Z1)"},{"date":"2026-12-04","k":"barra","t":"B18","d":"Mobilidade · 6x 1 min. p/ fazer 6-12 Barras seguidas · 3x 15 Remadas invertidas(Alt. da cintura)/90seg de descanso · 3x 8 Rosca direta/90seg de descanso · 4x 25 Abdominal Remador/30seg desc."},{"date":"2026-12-05","k":"corrida","t":"3×(200+100 m)","d":"10min (Z1) + 3x 200+100(20seg)/2' +5min (Z1)"},{"date":"2026-12-07","k":"barra","t":"B19","d":"Mobilidade · 3x 6+3+3+3 Barra (30seg intra-set) · 3x 8 Rosca direta/90seg de descanso · 1x 60 Abdominal Remador dividido em blocos"},{"date":"2026-12-08","k":"corrida","t":"10×1' (Z5)","d":"10min (Z1) + 10x 1' (Z5) / 1:30 + 5min (Z1)"},{"date":"2026-12-09","k":"cond","t":"","d":"","pr":"p6"},{"date":"2026-12-09","k":"cond","t":"","d":"","pr":"p3c"},{"date":"2026-12-10","k":"corrida","t":"Trote 30'","d":"30 min trote (Z1)"},{"date":"2026-12-11","k":"barra","t":"B20","d":"Mobilidade · 3x 8+4+4 Barra (30seg intra-set) · 3x 6 Rosca direta/90seg de descanso(Aumentar carga) · 2x 40 Abdominal Remador/90s de descanso"},{"date":"2026-12-12","k":"corrida","t":"3×400 m","d":"10min (Z1) + 3x 400/6'caminhada +5min (Z1)"},{"date":"2026-12-14","k":"barra","t":"B21 (deload)","d":"Mobilidade · 3x 6+3+3 Barra ou Isometria 2x45seg (30s intra-set) · 3x 6 Rosca direta/90seg de descanso · 1x 45 Abdominal Remador/90s de descanso"},{"date":"2026-12-15","k":"corrida","t":"6×1' (Z5)","d":"10min (Z1) + 6x 1'(Z5) / 2'+ 5min (Z1)"},{"date":"2026-12-16","k":"cond","t":"","d":"","pr":"p6"},{"date":"2026-12-16","k":"cond","t":"","d":"","pr":"p3c"},{"date":"2026-12-17","k":"corrida","t":"Trote 32'","d":"32 min trote (Z1)"},{"date":"2026-12-18","k":"barra","t":"B21 (deload)","d":"Mobilidade · 3x 6+3+3 Barra ou Isometria 2x45seg (30s intra-set) · 3x 6 Rosca direta/90seg de descanso · 1x 45 Abdominal Remador/90s de descanso"},{"date":"2026-12-19","k":"corrida","t":"3×(200+100 m)","d":"10min (Z1) + 3x 200+100(10seg)/5' desc. +5min (Z1)"},{"date":"2026-12-21","k":"barra","t":"B22","d":"Mobilidade · 1x Max. Barra ou Isometria/60 seg de descanso · 1x 50 Abdominal Remador em 1min"},{"date":"2026-12-22","k":"corrida","t":"6×1' (Z5)","d":"10min (Z1) + 6x 1' (Z5) / 1:30 + 5min (Z1)"},{"date":"2026-12-23","k":"cond","t":"","d":"","pr":"p6"},{"date":"2026-12-23","k":"cond","t":"","d":"","pr":"p3c"},{"date":"2026-12-24","k":"corrida","t":"Trote 25'","d":"25 min trote (Z1)"},{"date":"2026-12-25","k":"barra","t":"B23","d":"Mobilidade · 6x 1 min. p/ fazer 6-12 Barras seguidas · 3x 10 Remadas invertidas(Alt. da cintura)/90seg de descanso · 3x 6 Rosca direta/90seg de descanso(Aumentar a carga) · 4x 25 Abdominal Remador/30seg desc."},{"date":"2026-12-26","k":"corrida","t":"2×250 m","d":"12min (Z1) + 2x 250m/6' desc. +5min (Z1)"},{"date":"2026-12-28","k":"barra","t":"B24","d":"Mobilidade · 3x 6+3+3+3 Barra (30seg intra-set) · 3x 8 Rosca direta/90seg de descanso · 1x 80 Abdominal Remador dividido em blocos"},{"date":"2026-12-30","k":"cond","t":"","d":"","pr":"p5"},{"date":"2026-12-30","k":"cond","t":"","d":"","pr":"p3a"},{"date":"2027-01-01","k":"barra","t":"B25","d":"Mobilidade · 2x 8+4+4 Barra (30seg intra-set) · 3x 6 Rosca direta/90seg de descanso(Aumentar carga) · 2x 50 Abdominal Remador/90s de descanso"},{"date":"2027-01-06","k":"cond","t":"","d":"","pr":"p5"},{"date":"2027-01-06","k":"cond","t":"","d":"","pr":"p3a"},{"date":"2027-01-13","k":"cond","t":"","d":"","pr":"p5"},{"date":"2027-01-13","k":"cond","t":"","d":"","pr":"p3a"},{"date":"2027-01-20","k":"cond","t":"","d":"","pr":"p5"},{"date":"2027-01-20","k":"cond","t":"","d":"","pr":"p3a"}];
+  var BAR_EX = {"B10":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"1x Max. Barra/60 seg de descanso","sets":1,"segs":["Máximo de repetições"],"intra":0,"rest":60,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"1x Max. Abdominal Remador","sets":1,"segs":["Máximo de repetições"],"intra":0,"rest":90,"timed":0,"restDef":true}],"B11":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"4x (Max.+50%+50%+50%) Barra ou Isometria/20'' intra-set","sets":4,"segs":["Máximo de repetições","50% do máximo","50% do máximo","50% do máximo"],"intra":20,"rest":90,"timed":0,"restDef":true,"iso":true},{"k":"roscaB","n":"Rosca direta","txt":"3x 6 Rosca direta/90seg de descanso","sets":3,"segs":["6 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"3x 35-20 Abdominal Remador (20 seg intra-set)","sets":3,"segs":["35 repetições","20 repetições"],"intra":20,"rest":90,"timed":0,"restDef":true}],"B12":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"1x Max. Barra ou Isometria/60 seg de descanso","sets":1,"segs":["Máximo de repetições"],"intra":0,"rest":60,"timed":0,"iso":true},{"k":"remInv","n":"Remada invertida","txt":"3x 15 Remadas invertidas (Alt. da cintura)/90seg de descanso","sets":3,"segs":["15 repetições"],"intra":0,"rest":90,"timed":0},{"k":"negativa","n":"Barra negativa","txt":"3x 3 Barra negativa/90seg de descanso","sets":3,"segs":["3 repetições"],"intra":0,"rest":90,"timed":0},{"k":"roscaB","n":"Rosca direta","txt":"3x 8 Rosca direta/90seg de descanso","sets":3,"segs":["8 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"3x 20+15+10 (20s intra-set) Abdominal Remador/60seg desc.","sets":3,"segs":["20 repetições","15 repetições","10 repetições"],"intra":20,"rest":60,"timed":0}],"B13":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"4x Max. Barra/90 seg de descanso","sets":4,"segs":["Máximo de repetições"],"intra":0,"rest":90,"timed":0},{"k":"assist","n":"Barra assistida (elástico leve)","txt":"3x 8 Barras assistidas (Elastico leve)/90seg de descanso","sets":3,"segs":["8 repetições"],"intra":0,"rest":90,"timed":0},{"k":"roscaB","n":"Rosca direta","txt":"3x 6 Rosca direta/90seg de descanso (Aumentar carga)","sets":3,"segs":["6 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"30+20 (15s intra-set) Abdominal Remador/60seg desc.","sets":1,"segs":["30 repetições","20 repetições"],"intra":15,"rest":60,"timed":0}],"B14 (deload)":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"4x 3-6 Barra/45 seg de descanso","sets":4,"segs":["3 a 6 repetições"],"intra":0,"rest":45,"timed":0},{"k":"remInv","n":"Remada invertida","txt":"3x 12 Remadas invertidas (Alt. da cintura)/90seg de descanso","sets":3,"segs":["12 repetições"],"intra":0,"rest":90,"timed":0},{"k":"roscaB","n":"Rosca direta","txt":"3x 6 Rosca direta/90seg de descanso","sets":3,"segs":["6 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"3x 15 Abdominal Remador/15seg desc.","sets":3,"segs":["15 repetições"],"intra":0,"rest":15,"timed":0}],"B15":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"3x 7 Barra /90 seg de descanso","sets":3,"segs":["7 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remInv","n":"Remada invertida","txt":"3x 12 Remadas invertidas (Alt. da cintura)/90seg de descanso","sets":3,"segs":["12 repetições"],"intra":0,"rest":90,"timed":0},{"k":"roscaB","n":"Rosca direta","txt":"3x 8 Rosca direta/90seg de descanso","sets":3,"segs":["8 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"2x 40 Abdominal Remador/60seg desc.","sets":2,"segs":["40 repetições"],"intra":0,"rest":60,"timed":0}],"B16":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"4x (Max+Max) Barra (20s intra-set)/90 seg de desc.","sets":4,"segs":["Máximo de repetições","Máximo de repetições"],"intra":20,"rest":90,"timed":0},{"k":"remInv","n":"Remada invertida","txt":"3x 10 Remadas invertida/90seg de descanso","sets":3,"segs":["10 repetições"],"intra":0,"rest":90,"timed":0},{"k":"roscaB","n":"Rosca direta","txt":"3x 8 Rosca direta/90seg de descanso","sets":3,"segs":["8 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"2x 50 Abdominal Remador/60seg desc.","sets":2,"segs":["50 repetições"],"intra":0,"rest":60,"timed":0}],"B17":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"3x 9 Barra ou 40s de Isometria/90 seg de descanso","sets":3,"segs":["9 repetições"],"intra":0,"rest":90,"timed":0,"iso":true},{"k":"roscaB","n":"Rosca direta","txt":"3x 6 Rosca direta/90seg de descanso (Aumentar carga)","sets":3,"segs":["6 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"1x 50 Abdominal Remador dividido em blocos","sets":1,"segs":["50 repetições"],"intra":0,"rest":90,"timed":0,"restDef":true,"blocos":true}],"B18":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"6x 1 min. p/ fazer 6-12 Barras seguidas","sets":6,"segs":["6 a 12 barras seguidas"],"intra":0,"rest":0,"timed":60},{"k":"remInv","n":"Remada invertida","txt":"3x 15 Remadas invertidas (Alt. da cintura)/90seg de descanso","sets":3,"segs":["15 repetições"],"intra":0,"rest":90,"timed":0},{"k":"roscaB","n":"Rosca direta","txt":"3x 8 Rosca direta/90seg de descanso","sets":3,"segs":["8 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"4x 25 Abdominal Remador/30seg desc.","sets":4,"segs":["25 repetições"],"intra":0,"rest":30,"timed":0}],"B19":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"3x 6+3+3+3 Barra (30seg intra-set)","sets":3,"segs":["6 repetições","3 repetições","3 repetições","3 repetições"],"intra":30,"rest":90,"timed":0,"restDef":true},{"k":"roscaB","n":"Rosca direta","txt":"3x 8 Rosca direta/90seg de descanso","sets":3,"segs":["8 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"1x 60 Abdominal Remador dividido em blocos","sets":1,"segs":["60 repetições"],"intra":0,"rest":90,"timed":0,"restDef":true,"blocos":true}],"B20":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"3x 8+4+4 Barra (30seg intra-set)","sets":3,"segs":["8 repetições","4 repetições","4 repetições"],"intra":30,"rest":90,"timed":0,"restDef":true},{"k":"roscaB","n":"Rosca direta","txt":"3x 6 Rosca direta/90seg de descanso (Aumentar carga)","sets":3,"segs":["6 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"2x 40 Abdominal Remador/90s de descanso","sets":2,"segs":["40 repetições"],"intra":0,"rest":90,"timed":0}],"B21 (deload)":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"3x 6+3+3 Barra ou Isometria 2x45seg (30s intra-set)","sets":3,"segs":["6 repetições","3 repetições","3 repetições"],"intra":30,"rest":90,"timed":0,"restDef":true,"iso":true},{"k":"roscaB","n":"Rosca direta","txt":"3x 6 Rosca direta/90seg de descanso","sets":3,"segs":["6 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"1x 45 Abdominal Remador/90s de descanso","sets":1,"segs":["45 repetições"],"intra":0,"rest":90,"timed":0}],"B22":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"1x Max. Barra ou Isometria/60 seg de descanso","sets":1,"segs":["Máximo de repetições"],"intra":0,"rest":60,"timed":0,"iso":true},{"k":"remador","n":"Abdominal Remador","txt":"1x 50 Abdominal Remador em 1min","sets":1,"segs":["50 repetições"],"intra":0,"rest":0,"timed":60}],"B23":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"6x 1 min. p/ fazer 6-12 Barras seguidas","sets":6,"segs":["6 a 12 barras seguidas"],"intra":0,"rest":0,"timed":60},{"k":"remInv","n":"Remada invertida","txt":"3x 10 Remadas invertidas (Alt. da cintura)/90seg de descanso","sets":3,"segs":["10 repetições"],"intra":0,"rest":90,"timed":0},{"k":"roscaB","n":"Rosca direta","txt":"3x 6 Rosca direta/90seg de descanso (Aumentar a carga)","sets":3,"segs":["6 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"4x 25 Abdominal Remador/30seg desc.","sets":4,"segs":["25 repetições"],"intra":0,"rest":30,"timed":0}],"B24":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"3x 6+3+3+3 Barra (30seg intra-set)","sets":3,"segs":["6 repetições","3 repetições","3 repetições","3 repetições"],"intra":30,"rest":90,"timed":0,"restDef":true},{"k":"roscaB","n":"Rosca direta","txt":"3x 8 Rosca direta/90seg de descanso","sets":3,"segs":["8 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"1x 80 Abdominal Remador dividido em blocos","sets":1,"segs":["80 repetições"],"intra":0,"rest":90,"timed":0,"restDef":true,"blocos":true}],"B25":[{"mob":true,"n":"Mobilidade","txt":"Mobilidade"},{"k":"barra","n":"Barra","txt":"2x 8+4+4 Barra (30seg intra-set)","sets":2,"segs":["8 repetições","4 repetições","4 repetições"],"intra":30,"rest":90,"timed":0,"restDef":true},{"k":"roscaB","n":"Rosca direta","txt":"3x 6 Rosca direta/90seg de descanso (Aumentar carga)","sets":3,"segs":["6 repetições"],"intra":0,"rest":90,"timed":0},{"k":"remador","n":"Abdominal Remador","txt":"2x 50 Abdominal Remador/90s de descanso","sets":2,"segs":["50 repetições"],"intra":0,"rest":90,"timed":0}]};
   var PLAN_BY = {};
   PLAN.forEach(function (it) { it.id = it.date + '|' + it.k + (it.pr || ''); (PLAN_BY[it.date] = PLAN_BY[it.date] || []).push(it); });
   var MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -896,7 +900,8 @@ var FigEngine = (function () {
       var dn = !!store.done[it.id];
       h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4>' + (it.k === 'barra' ? barList(it.d) : '<p>' + esc(itemDetail(it)) + '</p>') + '<div class="btns">' +
         '<button type="button" class="mark' + (dn ? ' on' : '') + '" data-act="mark" data-id="' + it.id + '" aria-pressed="' + dn + '"><span class="box" aria-hidden="true">' + (dn ? '✓' : '') + '</span>' + (dn ? 'Feito · toque para desfazer' : 'Marcar como feito') + '</button>' +
-        (it.k === 'cond' ? '<button type="button" class="openp" data-act="open" data-from="cal" data-id="' + it.pr + '">Abrir programa e cronômetro</button>' : '') + '</div></article>';
+        (it.k === 'cond' ? '<button type="button" class="openp" data-act="open" data-from="cal" data-id="' + it.pr + '">Abrir programa e cronômetro</button>' : '') +
+        (it.k === 'barra' ? '<button type="button" class="openp" data-act="openbar" data-from="cal" data-t="' + esc(it.t) + '">Abrir treino e cronômetro</button>' : '') + '</div></article>';
     });
     h += '</section></div>';
     el(h);
@@ -941,14 +946,16 @@ var FigEngine = (function () {
   function renderBar() {
     var g = barSessions().filter(function (x) { return x.t === curBar; })[0];
     if (!g) { view = 'home'; renderHome(); return; }
-    var h = '<div class="wrap"><button type="button" class="back" data-act="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Programas</button>' +
+    var h = '<div class="wrap"><button type="button" class="back" data-act="' + (from === 'cal' ? 'tab' : 'home') + '"' + (from === 'cal' ? ' data-v="cal"' : '') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>' + (from === 'cal' ? 'Calendário' : 'Programas') + '</button>' +
       '<div class="ptitle"><h1>Treino ' + esc(g.t) + '</h1><div class="chips"><span class="chip">Barra</span><span class="chip">Semana ' + g.its.map(function (it) { return weekOf(it.date); }).filter(function (w, i, ar) { return ar.indexOf(w) === i; }).join(' e ') + '</span></div></div>';
     h += '<article class="sess barra"><div class="kind">Exercícios</div>' + barList(g.d) + '<div class="btns">';
     g.its.forEach(function (it) {
       var dn = !!store.done[it.id];
       h += '<button type="button" class="mark' + (dn ? ' on' : '') + '" data-act="mark" data-id="' + it.id + '" aria-pressed="' + dn + '"><span class="box" aria-hidden="true">' + (dn ? '✓' : '') + '</span>' + (dn ? 'Feito em ' + shortDate(it.date) + ' · toque para desfazer' : 'Marcar ' + shortDate(it.date) + ' como feito') + '</button>';
     });
-    h += '</div></article><p class="hint">O descanso de cada exercício está escrito ao lado dele. Use o cronômetro do celular entre as séries.</p></div>';
+    var anyDef = (BAR_EX[g.t] || []).some(function (e) { return e.restDef; });
+    h += '</div></article><p class="hint">No cronômetro, toque em “Série feita” ao terminar cada série. O descanso e o intervalo entre partes contam sozinhos.' + (anyDef ? ' Onde o documento não informa o descanso entre séries, o app usa 90 s.' : '') + '</p>' +
+      '<div class="bar"><button type="button" class="start" data-act="bstart">Iniciar</button></div></div>';
     el(h);
   }
 
@@ -1097,7 +1104,7 @@ var FigEngine = (function () {
 
   function stopTimer() {
     if (timerId) clearInterval(timerId); timerId = null;
-    T = null; unlockScreen();
+    T = null; BT = null; unlockScreen();
     try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
   }
 
@@ -1178,11 +1185,176 @@ var FigEngine = (function () {
     el(h);
   }
 
+
+  /* ---------- Cronômetro do treino de barra ---------- */
+  var BT = null;
+  function bPhases(ex) {
+    var ph = [{ kind: 'prep', dur: 10 }], real = ex.filter(function (e) { return !e.mob; });
+    ex.forEach(function (e, ei) {
+      if (e.mob) { ph.push({ kind: 'mob', ei: ei }); return; }
+      var isLast = real.indexOf(e) === real.length - 1;
+      var nxt = null; for (var q = ei + 1; q < ex.length; q++) { if (!ex[q].mob) { nxt = q; break; } }
+      for (var s = 1; s <= e.sets; s++) {
+        for (var j = 0; j < e.segs.length; j++) {
+          ph.push({ kind: 'work', ei: ei, s: s, j: j, dur: e.timed || 0 });
+          if (j < e.segs.length - 1 && e.intra) ph.push({ kind: 'intra', dur: e.intra, ei: ei, s: s, nx: { ei: ei, s: s, j: j + 1 } });
+        }
+        var last = s === e.sets;
+        if (e.rest > 0 && !(isLast && last)) ph.push({ kind: 'rest', dur: e.rest, ei: ei, s: s, nx: last ? { ei: nxt, s: 1, j: 0 } : { ei: ei, s: s + 1, j: 0 } });
+      }
+    });
+    return ph;
+  }
+  function bSeg(e, j) { var t = e.segs[j] || ''; return e.timed ? ('Em 1 min: ' + t) : t; }
+  function bDesc(ref) {
+    var e = BT.ex[ref.ei];
+    if (e.mob) return 'Mobilidade';
+    return e.n + ' · série ' + ref.s + ' de ' + e.sets + (e.segs.length > 1 ? ' · parte ' + (ref.j + 1) + ' de ' + e.segs.length : '');
+  }
+  function bNextRef(i) {
+    for (var q = i + 1; q < BT.ph.length; q++) { var x = BT.ph[q]; if (x.kind === 'work' || x.kind === 'mob') return { ei: x.ei, s: x.s || 1, j: x.j || 0 }; }
+    return null;
+  }
+  function startBar() {
+    var ex = BAR_EX[curBar]; if (!ex) return;
+    audio();
+    var ph = bPhases(ex), real = ex.filter(function (e) { return !e.mob; });
+    var now = performance.now();
+    BT = { t: curBar, ex: ex, ph: ph, real: real, i: 0, running: true, el: 0, last: now, runMs: 0, lastBeep: -1, done: false };
+    view = 'btimer'; confirmQuit = false;
+    lockScreen(); bOnPhase(); renderBar2();
+    if (timerId) clearInterval(timerId);
+    timerId = setInterval(btick, 100);
+  }
+  function bOnPhase() {
+    var ph = BT.ph[BT.i], e = BT.ex[ph.ei || 0], say = '';
+    BT.lastBeep = -1;
+    if (ph.kind === 'prep') { beep(880, 0.25); say = 'Prepare-se'; }
+    else if (ph.kind === 'mob') { beep(1320, 0.4); buzz([200]); say = 'Mobilidade'; }
+    else if (ph.kind === 'work') { beep(1320, 0.5); buzz([200]); say = e.n + '. Série ' + ph.s + ' de ' + e.sets + '. ' + (e.segs.length > 1 ? 'Parte ' + (ph.j + 1) + '. ' : '') + bSeg(e, ph.j); }
+    else { beep(600, 0.18); beep(600, 0.18, 0.28); buzz([120, 80, 120]); var nr = ph.nx && ph.nx.ei != null ? bDesc(ph.nx) : ''; say = (ph.kind === 'intra' ? 'Descanso curto. ' : 'Descanso. ') + (nr ? 'Próximo: ' + nr : ''); }
+    speak(say);
+    live.textContent = bLabel(ph);
+  }
+  function bLabel(ph) { return ph.kind === 'prep' ? 'Prepare-se' : ph.kind === 'mob' ? 'Mobilidade' : ph.kind === 'work' ? (ph.dur ? 'Trabalho' : 'Faça a série') : ph.kind === 'intra' ? 'Descanso curto' : 'Descanso'; }
+  function bAdvance(carry) {
+    if (BT.i >= BT.ph.length - 1) { bFinish(); return false; }
+    BT.i++; BT.el = carry || 0; BT.last = performance.now();
+    bOnPhase(); renderBar2(); return true;
+  }
+  function bGo(idx) {
+    idx = Math.max(0, idx);
+    if (idx >= BT.ph.length) { bFinish(); return; }
+    BT.i = idx; BT.el = 0; BT.last = performance.now(); bOnPhase(); renderBar2();
+  }
+  function btick() {
+    if (!BT || BT.done) return;
+    var now = performance.now();
+    if (BT.running) {
+      BT.el += now - BT.last; BT.runMs += now - BT.last; BT.last = now;
+      var guard = 0, ph = BT.ph[BT.i];
+      while (ph.dur && BT.el >= ph.dur * 1000 && guard++ < 50) { if (!bAdvance(BT.el - ph.dur * 1000)) return; ph = BT.ph[BT.i]; }
+    } else BT.last = now;
+    bDigits();
+  }
+  function bDigits() {
+    var ph = BT.ph[BT.i], cd = document.getElementById('cd'); if (!cd) return;
+    var tm = ph.dur ? Math.max(0, ph.dur * 1000 - BT.el) : BT.el;
+    cd.textContent = fmtClock(tm / 1000);
+    if (ph.dur) {
+      var sec = Math.ceil(tm / 1000);
+      if (BT.running && sec >= 1 && sec <= 3 && ph.dur >= 5 && sec !== BT.lastBeep) { BT.lastBeep = sec; beep(880, 0.12); buzz([40]); }
+    }
+    var pp = document.getElementById('pbPhase'); if (pp) pp.style.width = (ph.dur ? Math.min(100, BT.el / (ph.dur * 1000) * 100) : 0) + '%';
+    var pt = document.getElementById('pbTotal'); if (pt) pt.style.width = (BT.i / BT.ph.length * 100) + '%';
+  }
+  function bToggle() {
+    if (BT.running) { BT.running = false; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} unlockScreen(); }
+    else { BT.running = true; BT.last = performance.now(); lockScreen(); audio(); }
+    renderBar2(); bDigits();
+  }
+  function bFinish() {
+    BT.done = true; BT.running = false;
+    clearInterval(timerId); timerId = null; unlockScreen();
+    beep(784, 0.18); beep(988, 0.18, 0.22); beep(1318, 0.45, 0.44); buzz([300, 100, 300]);
+    speak('Treino concluído');
+    BT.calMsg = '';
+    var tdIso = isoOf(new Date()), hit = null, mine = PLAN.filter(function (it) { return it.k === 'barra' && it.t === BT.t; });
+    var todays = mine.filter(function (it) { return it.date === tdIso; })[0];
+    if (todays) { if (store.done[todays.id]) BT.calMsg = 'Hoje já estava marcado no calendário'; else hit = todays; }
+    else {
+      var pend = mine.filter(function (it) { return !store.done[it.id]; });
+      hit = pend.filter(function (it) { return it.date < tdIso; })[0] || pend.filter(function (it) { return it.date > tdIso; })[0] || null;
+    }
+    if (hit) { store.done[hit.id] = new Date().toISOString(); save(); BT.calMsg = '✓ Marcado no calendário: ' + shortDate(hit.date); var hd = parseISO(hit.date); cal = { y: hd.getFullYear(), m: hd.getMonth(), sel: hit.date }; }
+    view = 'bdone'; confirmQuit = false;
+    renderBDone();
+  }
+  function renderBar2() {
+    var ph = BT.ph[BT.i], e = BT.ex[ph.ei || 0], K = BT.real.length;
+    var cls = ph.kind === 'work' || ph.kind === 'mob' ? 'work' : ph.kind === 'prep' ? 'prep' : 'rest';
+    var fs = function (k, c) { return '<span class="' + c + '" data-fig="' + k + '"></span>'; };
+    var big = function (ee) { return ee.mob ? '<span class="figbig mob" aria-hidden="true">🧘</span>' : fs(ee.k, 'figbig'); };
+    var where = 'Treino ' + esc(BT.t), main = '';
+    if (ph.kind === 'work') {
+      where = 'Exercício ' + (BT.real.indexOf(e) + 1) + ' de ' + K + ' · Série ' + ph.s + ' de ' + e.sets;
+      main = big(e) + '<div class="exname">' + esc(e.n) + '</div>' +
+        (e.segs[ph.j] ? '<div class="target">' + esc(bSeg(e, ph.j)) + '</div>' : '') +
+        (e.segs.length > 1 ? '<div class="binfo">Parte ' + (ph.j + 1) + ' de ' + e.segs.length + ' · ' + e.intra + ' s de intervalo</div>' : '') +
+        (e.rest > 0 ? '<div class="binfo">Descanso depois: ' + e.rest + ' s' + (e.restDef ? ' (padrão)' : '') + '</div>' : '') +
+        (e.blocos ? '<div class="binfo">Divida em blocos, como o instrutor orientou.</div>' : '') +
+        (e.iso ? '<div class="binfo">Pode fazer isometria no lugar' + (/40s de/i.test(e.txt) ? ' (40 s)' : /2x45/.test(e.txt) ? ' (2x 45 s)' : '') + '.</div>' : '');
+    } else if (ph.kind === 'mob') {
+      where = 'Treino ' + esc(BT.t) + ' · Aquecimento';
+      main = big(e) + '<div class="exname">Mobilidade</div><div class="binfo">Faça o aquecimento e toque em Concluir quando terminar.</div>';
+    } else if (ph.kind === 'prep') {
+      var f0 = BT.ex[bNextRef(0).ei];
+      main = big(f0) + '<div class="next">Primeiro: <b>' + esc(f0.n) + '</b></div>';
+    } else {
+      var nr = ph.nx && ph.nx.ei != null ? ph.nx : null, ne = nr ? BT.ex[nr.ei] : null;
+      where = 'Série ' + ph.s + ' de ' + e.sets + ' · ' + esc(e.n);
+      main = ne ? big(ne) + '<div class="next">' + (ph.kind === 'intra' ? 'Já volta: ' : 'Próximo: ') + '<b>' + esc(bDesc(nr)) + '</b></div>' + (ne.segs[nr.j] ? '<div class="target">' + esc(bSeg(ne, nr.j)) + '</div>' : '') : '';
+    }
+    var manual = (ph.kind === 'work' && !ph.dur) || ph.kind === 'mob';
+    var label = BT.running || manual ? bLabel(ph) : 'Pausado';
+    var mainBtn = manual
+      ? '<button type="button" class="cbtn main" data-act="bdone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 16.2L5.3 12l-1.4 1.4 5.6 5.6L20.1 8.4 18.7 7z"/></svg>' + (ph.kind === 'mob' ? 'Concluir' : 'Série feita') + '</button>'
+      : '<button type="button" class="cbtn main" data-act="bpause">' + (BT.running ? ICON.pause + 'Pausar' : ICON.play + 'Continuar') + '</button>';
+    var h = '<div class="timer ' + cls + '" role="region" aria-label="Cronômetro do treino de barra">' +
+      '<div class="thead"><button type="button" class="tbtn" data-act="bquit">Sair</button><div class="tgroup">' +
+      '<button type="button" class="tbtn" data-act="sound" aria-pressed="' + store.prefs.sound + '">Som</button>' +
+      '<button type="button" class="tbtn" data-act="voice" aria-pressed="' + store.prefs.voice + '">Voz</button></div></div>' +
+      '<div class="pbar" aria-hidden="true"><i id="pbTotal"></i></div>' +
+      '<div class="where">' + where + '</div>' +
+      '<div class="tmain"><div class="phase">' + label + '</div><div class="count" id="cd">0:00</div><div class="pbar ph" aria-hidden="true"><i id="pbPhase"></i></div>' + main + '</div>' +
+      '<div class="controls"><button type="button" class="cbtn" data-act="bprev">' + ICON.prev + 'Voltar</button>' + mainBtn +
+      '<button type="button" class="cbtn" data-act="bnext">' + ICON.next + 'Pular</button></div>' +
+      (confirmQuit ? '<div class="sheet"><div><h3>Encerrar o treino?</h3><p>O progresso desta sessão será perdido.</p><div class="two"><button type="button" data-act="bkeep">Continuar</button><button type="button" class="danger" data-act="bend">Encerrar</button></div></div></div>' : '') +
+      '</div>';
+    el(h); bDigits();
+  }
+  function renderBDone() {
+    var secs = Math.round(BT.runMs / 1000);
+    var h = '<div class="timer done" role="region" aria-label="Treino concluído"><div class="tmain"><div class="donebox"><div class="big">Treino concluído</div>' +
+      '<p>Treino ' + esc(BT.t) + ' · Barra</p><div class="cap">Tempo de treino</div><div class="stat">' + fmtClock(secs) + '</div>' +
+      (BT.calMsg ? '<p style="margin-top:14px;font-weight:600">' + esc(BT.calMsg) + '</p>' : '') + '</div></div>' +
+      '<div class="controls" style="grid-template-columns:1fr 1fr 1fr"><button type="button" class="cbtn" data-act="home">Programas</button><button type="button" class="cbtn" data-act="tab" data-v="cal">Calendário</button><button type="button" class="cbtn main" data-act="bstart">Repetir</button></div></div>';
+    el(h);
+  }
+
   /* ---------- Eventos ---------- */
   app.addEventListener('click', function (e) {
     var b = e.target.closest('[data-act]'); if (!b) return;
     var act = b.getAttribute('data-act');
-    if (act === 'openbar') { curBar = b.getAttribute('data-t'); view = 'bar'; renderBar(); window.scrollTo(0, 0); }
+    if (act === 'openbar') { curBar = b.getAttribute('data-t'); from = b.getAttribute('data-from') || 'home'; view = 'bar'; renderBar(); window.scrollTo(0, 0); }
+    else if (act === 'bstart') startBar();
+    else if (act === 'bdone') { beep(1000, 0.08); buzz([30]); bAdvance(0); }
+    else if (act === 'bpause') bToggle();
+    else if (act === 'bnext') bGo(BT.i + 1);
+    else if (act === 'bprev') bGo(BT.el > 3000 ? BT.i : BT.i - 1);
+    else if (act === 'bquit') { confirmQuit = true; renderBar2(); }
+    else if (act === 'bkeep') { confirmQuit = false; renderBar2(); }
+    else if (act === 'bend') { stopTimer(); view = 'bar'; renderBar(); }
     else if (act === 'open') { curId = b.getAttribute('data-id'); from = b.getAttribute('data-from') || 'home'; view = 'prog'; renderProg(); window.scrollTo(0, 0); }
     else if (act === 'tab') { stopTimer(); from = 'home'; if (b.getAttribute('data-v') === 'cal') { view = 'cal'; renderCal(); } else { view = 'home'; renderHome(); } window.scrollTo(0, 0); }
     else if (act === 'calnav') { var nm = cal.m + Number(b.getAttribute('data-d')); cal.y += Math.floor(nm / 12); cal.m = ((nm % 12) + 12) % 12; renderCal(); }
@@ -1222,9 +1394,10 @@ var FigEngine = (function () {
 
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && T && !T.done) { if (T.running) { lockScreen(); tick(); } }
+    if (document.visibilityState === 'visible' && BT && !BT.done && BT.running) { lockScreen(); btick(); }
   });
 
-  window.__cfp = { PROGRAMS: PROGRAMS, buildPhases: buildPhases, totalSec: totalSec, getT: function () { return T; } };
+  window.__cfp = { PROGRAMS: PROGRAMS, buildPhases: buildPhases, totalSec: totalSec, getT: function () { return T; }, getBT: function () { return BT; }, BAR_EX: BAR_EX, bPhases: bPhases };
   try { FigEngine.start(); } catch (e) {}
   view = 'cal'; renderCal();
 })();
