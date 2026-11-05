@@ -152,6 +152,15 @@ h1, h2, h3, p, ol, ul { margin: 0; }
 .sess h4 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1.1; text-transform: uppercase; letter-spacing: .02em; }
 .sess p { margin: 0; font-size: 15px; color: var(--muted); }
 .sess .btns { display: grid; gap: 8px; }
+.exl { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.exl li { display: flex; align-items: center; gap: 10px; }
+.exl .ths { display: flex; gap: 4px; flex: none; }
+.exl .th { width: 60px; height: 60px; background: #EEF4F7; border-radius: 10px; padding: 3px; }
+.exl .th svg { display: block; width: 100%; height: 100%; }
+.exl .tx { font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--ink); }
+.exl .tx small { display: block; margin-top: 2px; font-size: 13px; font-weight: 400; line-height: 1.3; color: var(--muted); }
+.exl .tx small.rs { margin-top: 1px; font-size: 14px; font-weight: 500; color: var(--ink); opacity: .75; }
+.exl li.nofig { padding-left: 2px; }
 .mark { min-height: 50px; width: 100%; border-radius: 10px; border: 2px solid var(--c); background: transparent; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .mark .box { width: 24px; height: 24px; border-radius: 7px; border: 2.5px solid currentColor; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; line-height: 1; }
 .mark.on { background: var(--c); color: #fff; border-color: var(--c); }
@@ -285,6 +294,30 @@ var FIGS = (function () {
   var PU_A  = PLANK;
   var PU_B = P([79,76],[70,80],[41,84],[57,80],[71,90],[57,80],[73,90],[22,88],[6,90],[22,88],[6,90]);
 
+  /* ---- Barra fixa e remada invertida: poses geradas por cinemática (as mãos ficam sempre na barra) ---- */
+  function ik2(a, t, l1, l2, s) {
+    var dx = t[0] - a[0], dy = t[1] - a[1], d = Math.hypot(dx, dy) || 0.001;
+    var dd = Math.min(l1 + l2 - 0.02, Math.max(Math.abs(l1 - l2) + 0.02, d));
+    var x = (l1 * l1 - l2 * l2 + dd * dd) / (2 * dd), h = Math.sqrt(Math.max(0, l1 * l1 - x * x)), ux = dx / d, uy = dy / d;
+    return [a[0] + x * ux - s * h * uy, a[1] + x * uy + s * h * ux];
+  }
+  function BP(head, nk, hip, hand, lf, rf, sA, sL, la1, la2, ll1, ll2) {
+    var el = ik2(nk, hand, la1, la2, sA), lk = ik2(hip, lf, ll1, ll2, sL), rk = ik2(hip, rf, ll1, ll2, sL);
+    return P(head, nk, hip, el, hand, el, hand, lk, lf, rk, rf);
+  }
+  var BX = 58, BY = 2;                                   // barra fixa (x, y) no plano do boneco
+  function pull(u) {
+    var nk = [56 - 6 * u, 27.6 - 23.6 * u], hip = [nk[0] - 5 * u, nk[1] + 27.6];
+    return BP([nk[0] + 1.5 * u, nk[1] - 10 - 2 * u], nk, hip, [BX, BY], [hip[0] - 1.5, hip[1] + 37.9], [hip[0] - 2.5, hip[1] + 37.5], 1, -1, 14, 12, 20, 18);
+  }
+  var RBX = 66, RBY = 58;                                 // barra baixa da remada invertida
+  function rowp(th) {
+    var c = Math.cos(th), sn = Math.sin(th), at = function (d) { return [6 + d * c, 88 - d * sn]; };
+    return BP(at(70), at(60), at(32), [RBX, RBY], at(0), [at(0)[0] + 1.5, at(0)[1] - 0.3], 1, 1, 14, 12, 16, 16);
+  }
+  var PU0 = pull(0), PUM = pull(0.5), PU1 = pull(1);
+  var RW0 = rowp(3.8 * Math.PI / 180), RWM = rowp(13 * Math.PI / 180), RW1 = rowp(21 * Math.PI / 180);
+
   /* Cada pose vira um esqueleto de ossos (ângulo + comprimento) a partir do quadril. Entre duas poses o motor
      interpola os ÂNGULOS (os membros giram em arco, sem encolher) e o comprimento, e mantém o ponto mais baixo do
      corpo apoiado no chão. */
@@ -322,7 +355,13 @@ var FIGS = (function () {
     infra:   fig('Abdominal infra',      [LR_A, LR_B, LR_B], [0.9, 0.3, 1.2], ['io', 'io', 'io']),
     remador: fig('Abdominal remador',    [ROW_A, ROW_M, ROW_B, ROW_B, ROW_M], [0.5, 0.5, 0.3, 0.5, 0.55], ['in', 'out', 'io', 'in', 'out']),
     flexao:  fig('Flexão',               [PU_A, PU_B, PU_B], [1.0, 0.15, 0.8], ['io', 'io', 'io']),
-    burpee:  fig('Burpee',               [STAND, SQ_HANDS, PLANK, SQ_HANDS, JUMP], [0.4, 0.3, 0.3, 0.35, 0.45], ['io', 'out', 'io', 'out', 'in'])
+    burpee:  fig('Burpee',               [STAND, SQ_HANDS, PLANK, SQ_HANDS, JUMP], [0.4, 0.3, 0.3, 0.35, 0.45], ['io', 'out', 'io', 'out', 'in']),
+    barra:   fig('Barra',                [PU0, PUM, PU1, PUM], [0.8, 0.8, 0.8, 0.8], ['in', 'out', 'in', 'out'], { grip: { p: [4, 6], x: BX, y: BY } }),
+    isom:    fig('Isometria na barra',   [PU1], [1], ['lin'], { grip: { p: [4, 6], x: BX, y: BY } }),
+    negativa: fig('Barra negativa',      [PU1, PUM, PU0, PU0, PUM], [1.4, 1.4, 0.4, 0.4, 0.4], ['lin', 'lin', 'lin', 'in', 'out'], { grip: { p: [4, 6], x: BX, y: BY } }),
+    assist:  fig('Barra assistida',      [PU0, PUM, PU1, PUM], [0.9, 0.9, 0.9, 0.9], ['in', 'out', 'in', 'out'], { grip: { p: [4, 6], x: BX, y: BY } }),
+    remInv:  fig('Remada invertida',     [RW0, RWM, RW1, RWM], [0.8, 0.8, 0.8, 0.8], ['in', 'out', 'in', 'out'], { grip: { p: [4, 6], x: RBX, y: RBY } }),
+    roscaB:  fig('Rosca direta',         [CURL_A, CURL_B, CURL_B], [0.8, 0.2, 1.0], ['io', 'io', 'io'], { lagH: 0.05 })
   };
 })();
 
@@ -332,6 +371,26 @@ var FIGS = (function () {
 FIGS.rosca.dica = 'De lado: os dois braços sobem juntos, palmas para cima, cotovelos parados.';
 FIGS.martelo.dica = 'De frente: um braço de cada vez, polegar para cima, a mão sobe à frente do ombro.';
 FIGS.rosca.band = true; FIGS.martelo.band = true;
+FIGS.barra.rig = FIGS.isom.rig = FIGS.negativa.rig = FIGS.assist.rig = { x: 58, y: 2, w: 26 };
+FIGS.remInv.rig = { x: 66, y: 58, w: 26 };
+FIGS.negativa.rig = { x: 58, y: 2, w: 26, bench: { x0: 33, x1: 50, z: 11, y: 69.5 } };
+['barra', 'isom', 'negativa', 'assist'].forEach(function (k) { FIGS[k].face = 'x'; });
+FIGS.remInv.face = 'up';
+FIGS.assist.prop = function (q) { var f = [q[20], q[21]]; return [{ a: [57, 3, -2.5], b: [f[0], f[1], 3.5], t: 'band' }, { a: [59, 3, 2.5], b: [f[0], f[1], 3.5], t: 'band' }]; };
+FIGS.assist.propN = 2;
+FIGS.roscaB.prop = function (q) {
+  var hx = (q[8] + q[12]) / 2, hy = (q[9] + q[13]) / 2;
+  return [{ a: [hx, hy, -18], b: [hx, hy, 18], t: 'bar' },
+    { a: [hx, hy - 6.5, -14], b: [hx, hy + 6.5, -14], t: 'plate' }, { a: [hx, hy - 5, -17.5], b: [hx, hy + 5, -17.5], t: 'plate' },
+    { a: [hx, hy - 6.5, 14], b: [hx, hy + 6.5, 14], t: 'plate' }, { a: [hx, hy - 5, 17.5], b: [hx, hy + 5, 17.5], t: 'plate' }];
+};
+FIGS.roscaB.propN = 5;
+FIGS.barra.dica = 'Pegada pronada, mãos na largura dos ombros: sobe até o queixo passar da barra e desce controlando.';
+FIGS.isom.dica = 'Fica parado com o queixo acima da barra pelo tempo prescrito.';
+FIGS.negativa.dica = 'Sobe no banco até o queixo passar da barra, solta os pés e desce devagar (3 a 5 s) até esticar os braços.';
+FIGS.assist.dica = 'Elástico preso na barra e sob os pés: ele ajuda a subir. Mesmo movimento da barra.';
+FIGS.remInv.dica = 'Corpo reto debaixo de uma barra baixa, calcanhares no chão: puxa o peito até a barra.';
+FIGS.roscaB.dica = 'Em pé, cotovelos colados ao corpo: sobe a barra (ou halteres) até os ombros e desce controlando.';
 FIGS.plD.roll = true; FIGS.plD.flip = 1; FIGS.plE.roll = true; FIGS.plE.flip = 1; FIGS.plE.mirror = true;   // E = D espelhada na tela
 
 var FigEngine = (function () {
@@ -401,8 +460,12 @@ var FigEngine = (function () {
     var lel = tip(neck, L[0]), lha = tip(lel, L[1]), rel = tip(neck, R[0]), rha = tip(rel, R[1]);
     var lkn = tip(hip, LL[0]), lft = tip(lkn, LL[1]), rkn = tip(hip, RL[0]), rft = tip(rkn, RL[1]);
     var pts = [head, neck, hip, lel, lha, rel, rha, lkn, lft, rkn, rft];
-    var low, dy, out = new Array(22);
-    if (def.pin) {
+    var low, dy, dx = 0, out = new Array(22);
+    if (def.grip) {
+      var gx = 0, gy = 0;
+      def.grip.p.forEach(function (p) { gx += pts[p][0]; gy += pts[p][1]; });
+      dx = def.grip.x - gx / def.grip.p.length; dy = def.grip.y - gy / def.grip.p.length;
+    } else if (def.pin) {
       var cur = 0, tgt0 = 0, tgt1 = 0;
       def.pin.forEach(function (p) { cur += pts[p][1]; tgt0 += B0.q[p * 2 + 1]; tgt1 += B1.q[p * 2 + 1]; });
       dy = (tgt0 + (tgt1 - tgt0) * f - cur) / def.pin.length;
@@ -410,7 +473,7 @@ var FigEngine = (function () {
       low = Math.max(head[1], lel[1], lha[1], rel[1], rha[1], lkn[1], lft[1], rkn[1], rft[1]);
       dy = (B0.base + (B1.base - B0.base) * f) - low;
     }
-    for (var j = 0; j < 11; j++) { out[j * 2] = pts[j][0]; out[j * 2 + 1] = pts[j][1] + dy; }
+    for (var j = 0; j < 11; j++) { out[j * 2] = pts[j][0] + dx; out[j * 2 + 1] = pts[j][1] + dy; }
     if (B0.z || B1.z) { out.z = []; for (j = 0; j < 11; j++) { var za = B0.z ? B0.z[j] : 0, zb = B1.z ? B1.z[j] : 0; out.z[j] = za + (zb - za) * f; } }
     return out;
   }
@@ -469,6 +532,16 @@ var FigEngine = (function () {
       f.vz.setAttribute('cx', (h[0] + 4.6 * fxp).toFixed(1)); f.vz.setAttribute('cy', (h[1] + 4.6 * fys).toFixed(1));
       f.vz.setAttribute('rx', (2.2 + 1.8 * (1 - Math.abs(fxp))).toFixed(1)); f.vz.setAttribute('ry', 3.1);
     } else f.vz.setAttribute('opacity', 0);
+    if (f.props) {
+      var pl = def.prop(q);
+      for (var pj = 0; pj < pl.length; pj++) {
+        var it = pl[pj], st = PROPS[it.t], pa = proj(it.a[0], it.a[1], it.a[2]), pb = proj(it.b[0], it.b[1], it.b[2]), pp = f.props[pj];
+        [[pp.o, st[0]], [pp.l, st[1]]].forEach(function (z) {
+          z[0].setAttribute('x1', pa[0].toFixed(1)); z[0].setAttribute('y1', pa[1].toFixed(1)); z[0].setAttribute('x2', pb[0].toFixed(1)); z[0].setAttribute('y2', pb[1].toFixed(1));
+          z[0].setAttribute('stroke', z[1][0]); z[0].setAttribute('stroke-width', z[1][1]);
+        });
+      }
+    }
     if (f.bands) {
       var ends = [[16, 8, -1, 4], [20, 12, 1, 6]];
       for (var k = 0; k < 2; k++) {
@@ -492,6 +565,27 @@ var FigEngine = (function () {
     g.appendChild(S('polygon', { points: [pt(bot), pt(rig), pt(rig, T), pt(bot, T)].join(' '), fill: cr }));
     g.appendChild(S('polygon', { points: [pt(top), pt(rig), pt(bot), pt(lef)].join(' '), fill: '#D6E4EC', stroke: '#C2D5E0', 'stroke-width': 0.6 }));
   }
+  function rigDraw(g, r, front) {
+    setYaw(0);
+    var pt = function (x, y, z) { var p = proj(x, y, z); return [p[0].toFixed(1), p[1].toFixed(1)]; };
+    var ln = function (a, b, st, w) { return S('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: st, 'stroke-width': w }); };
+    var post = function (z) { var a = pt(r.x, GROUND, z), b = pt(r.x, r.y, z); g.appendChild(ln(a, b, '#6F808C', 3.4)); g.appendChild(ln(a, b, '#B4C3CD', 1.3)); };
+    if (!front) {
+      post(-r.w);
+      if (r.bench) {
+        var B = r.bench, P3 = function (x, y, z) { var p = proj(x, y, z); return p[0].toFixed(1) + ',' + p[1].toFixed(1); };
+        var face = function (pts, fill) { g.appendChild(S('polygon', { points: pts.join(' '), fill: fill, stroke: '#6B4E2A', 'stroke-width': 0.8, 'stroke-linejoin': 'round' })); };
+        face([P3(B.x1, B.y, -B.z), P3(B.x1, B.y, B.z), P3(B.x1, GROUND, B.z), P3(B.x1, GROUND, -B.z)], '#9C7846');
+        face([P3(B.x0, B.y, B.z), P3(B.x1, B.y, B.z), P3(B.x1, GROUND, B.z), P3(B.x0, GROUND, B.z)], '#B99359');
+        face([P3(B.x0, B.y, -B.z), P3(B.x1, B.y, -B.z), P3(B.x1, B.y, B.z), P3(B.x0, B.y, B.z)], '#D9B97F');
+      }
+      return;
+    }
+    var a = pt(r.x, r.y, -r.w), b = pt(r.x, r.y, r.w);
+    g.appendChild(ln(a, b, '#56656F', 3.2)); g.appendChild(ln(a, b, '#C5D2DA', 1.2));
+    post(r.w);
+  }
+  var PROPS = { band: [['#9A3412', 4.2], ['#FF8A2B', 2.6]], bar: [['#3B4650', 3.2], ['#9FB0BC', 1.4]], plate: [['#252C32', 4.4], ['#5B6872', 2.6]] };
   function mount(root) {
     defs(); figs = [];
     var hosts = (root || document).querySelectorAll('[data-fig]');
@@ -502,6 +596,7 @@ var FigEngine = (function () {
       var svg = S('svg', { viewBox: '0 0 100 100', 'aria-hidden': 'true', focusable: 'false', style: 'overflow:visible' });
       var g = S('g', { fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
       platform(g, def.mirror);
+      if (def.rig) rigDraw(g, def.rig);
       var f = { def: def, t0: animT, limbs: [], sh: [] };
       var shg = S('g', { opacity: 0.2, stroke: '#0B2A3C' });
       LIMBS.forEach(function (L) { var e = S('polyline', { 'stroke-width': L.w * 0.9 }); shg.appendChild(e); f.sh.push(e); });
@@ -516,10 +611,15 @@ var FigEngine = (function () {
           f.bands.push(bd);
         }
       }
+      if (def.prop) {
+        f.props = [];
+        for (var pi = 0; pi < def.propN; pi++) { var pe = { o: S('line', {}), l: S('line', {}) }; f.props.push(pe); g.appendChild(pe.o); g.appendChild(pe.l); }
+      }
       f.hd = S('circle', { r: 7.4, fill: 'url(#figHead)', stroke: '#0F5C86', 'stroke-width': 0.7 });
       f.hl = S('circle', { r: 1.8, fill: '#fff', opacity: 0.55, stroke: 'none' });
       f.vz = S('ellipse', { fill: '#0B4A70', stroke: 'none', opacity: 0 });
       g.appendChild(f.hd); g.appendChild(f.vz); g.appendChild(f.hl);
+      if (def.rig) rigDraw(g, def.rig, true);
       if (def.roll) { f.limbs.forEach(function (l) { if (!l.L.torso && !l.L.bar && l.L.side * def.flip < 0) l.els.forEach(function (e) { g.insertBefore(e, f.hd); }); }); }
       if (def.view === 'front') { f.limbs.forEach(function (l) { if (l.L.torso) { l.els[0].setAttribute('stroke-width', 16); l.els[1].setAttribute('stroke-width', 13.6); l.els[2].setAttribute('stroke-width', 9.4); } }); }
       if (def.mirror) { var gf = S('g', { transform: 'translate(100 0) scale(-1 1)' }); while (g.childNodes.length > 0) gf.appendChild(g.childNodes[0]); g.appendChild(gf); }
@@ -723,6 +823,26 @@ var FigEngine = (function () {
     var p = prog(it.pr), c = getCfg(p);
     return p.items.map(function (x) { return x.t; }).join(' · ');
   }
+  /* Treino de barra: cada exercício da prescrição ganha a figura animada correspondente */
+  function barFigs(txt) {
+    var t = txt.toLowerCase();
+    if (t.indexOf('mobilidade') >= 0) return [];
+    if (t.indexOf('negativa') >= 0) return ['negativa'];
+    if (t.indexOf('assistida') >= 0) return ['assist'];
+    if (t.indexOf('remadas invertida') >= 0 || t.indexOf('remada invertida') >= 0) return ['remInv'];
+    if (t.indexOf('rosca') >= 0) return ['roscaB'];
+    if (t.indexOf('abdominal') >= 0) return ['remador'];
+    if (t.indexOf('barra') >= 0 || t.indexOf('isometria') >= 0) return t.indexOf('isometria') >= 0 && t.indexOf('barra') >= 0 ? ['barra', 'isom'] : t.indexOf('barra') >= 0 ? ['barra'] : ['isom'];
+    return [];
+  }
+  function tidy(x) { return x.replace(/(\S)\(/g, '$1 (').replace(/\)(?=[A-Za-zÀ-ú])/g, ') ').replace(/\s+/g, ' ').trim(); }
+  function barList(d) {
+    return '<ul class="exl">' + d.split(' · ').map(function (part) {
+      var ks = barFigs(part), tip = ks.length ? FIGS[ks[0]].dica || '' : '', i = part.indexOf('/'), main = i < 0 ? part : part.slice(0, i), rest = i < 0 ? '' : part.slice(i + 1);
+      return '<li' + (ks.length ? '' : ' class="nofig"') + '>' + (ks.length ? '<span class="ths">' + ks.map(function (k) { return '<span class="th" data-fig="' + k + '" role="img" aria-label="' + esc(FIGS[k].nome) + '"></span>'; }).join('') + '</span>' : '') +
+        '<span class="tx">' + esc(tidy(main)) + (rest ? '<small class="rs">' + esc(tidy(rest)) + '</small>' : '') + (tip ? '<small>' + esc(tip) + '</small>' : '') + '</span></li>';
+    }).join('') + '</ul>';
+  }
   function weekOf(s) { return Math.floor((parseISO(s) - parseISO(PLAN[0].date)) / 604800000) + 1; }
 
   function calInit() {
@@ -774,7 +894,7 @@ var FigEngine = (function () {
     if (!its2.length) h += '<p class="rest" style="margin-top:8px">' + (sd.getDay() === 0 ? 'Domingo é dia de descanso.' : inPlan ? 'Sem treino previsto neste dia.' : 'Fora do cronograma.') + '</p>';
     its2.forEach(function (it) {
       var dn = !!store.done[it.id];
-      h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4><p>' + esc(itemDetail(it)) + '</p><div class="btns">' +
+      h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4>' + (it.k === 'barra' ? barList(it.d) : '<p>' + esc(itemDetail(it)) + '</p>') + '<div class="btns">' +
         '<button type="button" class="mark' + (dn ? ' on' : '') + '" data-act="mark" data-id="' + it.id + '" aria-pressed="' + dn + '"><span class="box" aria-hidden="true">' + (dn ? '✓' : '') + '</span>' + (dn ? 'Feito · toque para desfazer' : 'Marcar como feito') + '</button>' +
         (it.k === 'cond' ? '<button type="button" class="openp" data-act="open" data-from="cal" data-id="' + it.pr + '">Abrir programa e cronômetro</button>' : '') + '</div></article>';
     });
