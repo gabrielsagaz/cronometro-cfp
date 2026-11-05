@@ -1232,11 +1232,11 @@ var FigEngine = (function () {
     if (ph.kind === 'prep') { beep(880, 0.25); say = 'Prepare-se'; }
     else if (ph.kind === 'mob') { beep(1320, 0.4); buzz([200]); say = 'Mobilidade'; }
     else if (ph.kind === 'work') { beep(1320, 0.5); buzz([200]); say = e.n + '. Série ' + ph.s + ' de ' + e.sets + '. ' + (e.segs.length > 1 ? 'Parte ' + (ph.j + 1) + '. ' : '') + bSeg(e, ph.j); }
-    else { beep(600, 0.18); beep(600, 0.18, 0.28); buzz([120, 80, 120]); var nr = ph.nx && ph.nx.ei != null ? bDesc(ph.nx) : ''; say = (ph.kind === 'intra' ? 'Descanso curto. ' : 'Descanso. ') + (nr ? 'Próximo: ' + nr : ''); }
+    else { beep(600, 0.18); beep(600, 0.18, 0.28); buzz([120, 80, 120]); var nr = ph.nx && ph.nx.ei != null ? bDesc(ph.nx) : ''; say = (ph.kind === 'intra' ? 'Intervalo. ' : 'Descanso. ') + (nr ? 'Próximo: ' + nr : ''); }
     speak(say);
     live.textContent = bLabel(ph);
   }
-  function bLabel(ph) { return ph.kind === 'prep' ? 'Prepare-se' : ph.kind === 'mob' ? 'Mobilidade' : ph.kind === 'work' ? (ph.dur ? 'Trabalho' : 'Faça a série') : ph.kind === 'intra' ? 'Descanso curto' : 'Descanso'; }
+  function bLabel(ph) { return ph.kind === 'prep' ? 'Prepare-se' : ph.kind === 'mob' ? 'Mobilidade' : ph.kind === 'work' ? (ph.dur ? 'Trabalho' : 'Faça a série') : ph.kind === 'intra' ? 'Intervalo' : 'Descanso'; }
   function bAdvance(carry) {
     if (BT.i >= BT.ph.length - 1) { bFinish(); return false; }
     BT.i++; BT.el = carry || 0; BT.last = performance.now();
@@ -1300,8 +1300,8 @@ var FigEngine = (function () {
       where = 'Exercício ' + (BT.real.indexOf(e) + 1) + ' de ' + K + ' · Série ' + ph.s + ' de ' + e.sets;
       main = big(e) + '<div class="exname">' + esc(e.n) + '</div>' +
         (e.segs[ph.j] ? '<div class="target">' + esc(bSeg(e, ph.j)) + '</div>' : '') +
-        (e.segs.length > 1 ? '<div class="binfo">Parte ' + (ph.j + 1) + ' de ' + e.segs.length + ' · ' + e.intra + ' s de intervalo</div>' : '') +
-        (e.rest > 0 ? '<div class="binfo">Descanso depois: ' + e.rest + ' s' + (e.restDef ? ' (padrão)' : '') + '</div>' : '') +
+        (e.segs.length > 1 ? '<div class="binfo">Parte ' + (ph.j + 1) + ' de ' + e.segs.length + '</div>' : '') +
+        (function () { var np = BT.ph[BT.i + 1]; if (!np) return ''; if (np.kind === 'intra') return '<div class="binfo">Depois: intervalo de ' + np.dur + ' s</div>'; if (np.kind === 'rest') return '<div class="binfo">Depois: descanso de ' + np.dur + ' s' + (e.restDef ? ' (padrão)' : '') + '</div>'; return ''; })() +
         (e.blocos ? '<div class="binfo">Divida em blocos, como o instrutor orientou.</div>' : '') +
         (e.iso ? '<div class="binfo">Pode fazer isometria no lugar' + (/40s de/i.test(e.txt) ? ' (40 s)' : /2x45/.test(e.txt) ? ' (2x 45 s)' : '') + '.</div>' : '');
     } else if (ph.kind === 'mob') {
