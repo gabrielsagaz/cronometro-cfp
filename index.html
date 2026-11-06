@@ -938,6 +938,8 @@ var FigEngine = (function () {
   function calcZones(sec) { var o = {}; ZONES.forEach(function (q) { o[q.id] = [mmss(sec * q.a / 100), mmss(sec * q.b / 100)]; }); return o; }
   var ZSITE = 'https://trainerplan.co/pt/zone-pace-calculator/';
   function zset() { return ZONES.some(function (q) { return store.zones[q.id]; }); }
+  function zsec(t) { var m = /^(\d{1,2}):(\d\d)$/.exec(t); return m ? (+m[1]) * 60 + (+m[2]) : NaN; }
+  function zavg(v) { var x = zsec(v[0]), y = zsec(v[1]); return isNaN(x) || isNaN(y) ? v[0] : mmss((x + y) / 2); }
   function zfmt(v) { return v ? v[0] + ' – ' + v[1] : ''; }
   function zoneLine(it) {
     if (it.k !== 'corrida') return '';
@@ -954,7 +956,7 @@ var FigEngine = (function () {
     }).join('') + '</div>';
   }
   function zonesBtn() {
-    var sub = zset() ? ZONES.filter(function (q) { return store.zones[q.id]; }).map(function (q) { return q.z + ' ' + store.zones[q.id][0]; }).join(' · ') : 'Para lembrar o ritmo de cada corrida';
+    var sub = zset() ? ZONES.filter(function (q) { return store.zones[q.id]; }).map(function (q) { return q.z + ' ' + zavg(store.zones[q.id]); }).join(' · ') : 'Para lembrar o ritmo de cada corrida';
     return '<button type="button" class="zbtn" data-act="zones"><span class="zi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></svg></span><span><b>' + (zset() ? 'Meus ritmos de corrida' : 'Cadastrar meus ritmos de corrida') + '</b><small>' + esc(sub) + '</small></span><span class="ar" aria-hidden="true">›</span></button>';
   }
   function renderZones(msg, bad) {
