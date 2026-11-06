@@ -178,6 +178,41 @@ h1, h2, h3, p, ol, ul { margin: 0; }
 .pk[aria-pressed="true"] { background: var(--c); border-color: var(--c); color: #fff; }
 :root[data-theme="dark"] .pk[aria-pressed="true"] { color: #0B1013; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pk[aria-pressed="true"] { color: #0B1013; } }
+.zbtn { margin-top: 10px; width: 100%; min-height: 56px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); text-align: left; display: flex; align-items: center; gap: 12px; }
+.zbtn .zi { flex: none; width: 36px; height: 36px; border-radius: 10px; background: var(--chip); display: grid; place-items: center; color: var(--c-corr); }
+.zbtn .zi svg { width: 22px; height: 22px; }
+.zbtn b { display: block; font-weight: 600; }
+.zbtn small { display: block; font-size: 13px; color: var(--muted); margin-top: 1px; }
+.zbtn .ar { margin-left: auto; font-size: 22px; color: var(--muted); }
+.zline { display: grid; gap: 6px; padding: 10px 12px; border-radius: 10px; background: var(--chip); }
+.zline .zr { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 15px; }
+.zline .zr b { font-weight: 700; }
+.zline .zr span { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--c-corr); }
+.zline .zh { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.zline button.zlk { text-align: left; background: none; border: 0; padding: 4px 0; font-weight: 600; text-decoration: underline; color: var(--ink); }
+.zhow { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.zhow h2, .zform h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.zhow ol { margin: 10px 0 0; padding-left: 22px; display: grid; gap: 8px; line-height: 1.35; }
+.zhow ol b { font-weight: 600; }
+.zopen { margin-top: 14px; display: flex; align-items: center; justify-content: center; min-height: 50px; border-radius: 10px; background: var(--c-corr); color: #fff; font-weight: 700; text-decoration: none; }
+:root[data-theme="dark"] .zopen { color: #0B1013; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .zopen { color: #0B1013; } }
+.zform { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.zform p.zs { margin-top: 6px; font-size: 14px; color: var(--muted); }
+.zrow { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.zrow:first-of-type { border-top: 0; }
+.zrow .zl b { display: block; font-weight: 600; }
+.zrow .zl small { font-size: 12px; color: var(--muted); }
+.zrow .zi2 { display: flex; align-items: center; gap: 6px; }
+.zin { width: 66px; min-height: 46px; text-align: center; font-size: 17px; font-variant-numeric: tabular-nums; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.zin.bad { border-color: #C2362B; }
+.zact { margin-top: 14px; display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.zact .zsave { min-height: 50px; border-radius: 10px; border: 0; background: var(--c-corr); color: #fff; font-weight: 700; }
+:root[data-theme="dark"] .zact .zsave { color: #0B1013; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .zact .zsave { color: #0B1013; } }
+.zact .zclear { min-height: 50px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line); background: none; font-weight: 600; }
+.zmsg { margin-top: 10px; font-weight: 600; min-height: 22px; }
+.zmsg.err { color: #C2362B; }
 .openp { min-height: 44px; width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-weight: 600; }
 .rest { color: var(--muted); }
 
@@ -661,7 +696,7 @@ var FigEngine = (function () {
   var app = document.getElementById('app');
   var live = document.getElementById('live');
   var KEY = 'cfp-cronometro-v1';
-  var store = { cfg: {}, prefs: { sound: true, voice: true }, done: {}, alt: {} };
+  var store = { cfg: {}, prefs: { sound: true, voice: true }, done: {}, alt: {}, zones: {} };
   try {
     var s0 = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (s0 && typeof s0 === 'object') {
@@ -669,6 +704,7 @@ var FigEngine = (function () {
       store.prefs = Object.assign(store.prefs, s0.prefs || {});
       store.done = s0.done || {};
       store.alt = s0.alt || {};
+      store.zones = s0.zones || {};
     }
   } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
@@ -885,6 +921,48 @@ var FigEngine = (function () {
         return '<button type="button" class="pk" data-act="pick" data-date="' + it.date + '" data-pr="' + id + '" aria-pressed="' + (id === cur) + '">Programa ' + p.num + '<small>' + p.tipo + (id === it.pr ? ' · previsto' : '') + '</small></button>';
       }).join('') + '</div></div>';
   }
+  /* ---------- Zonas de ritmo (corrida) ---------- */
+  var ZONES = [{ id: 'z1', z: 'Z1', n: 'Fácil' }, { id: 'z2', z: 'Z2', n: 'Maratona' }, { id: 'z3', z: 'Z3', n: 'Umbral' }, { id: 'z4', z: 'Z4', n: 'Intervalo' }, { id: 'z5', z: 'Z5', n: 'Repetição' }];
+  var ZSITE = 'https://trainerplan.co/pt/zone-pace-calculator/';
+  function zset() { return ZONES.some(function (q) { return store.zones[q.id]; }); }
+  function zfmt(v) { return v ? v[0] + ' – ' + v[1] : ''; }
+  function zoneLine(it) {
+    if (it.k !== 'corrida') return '';
+    var used = ZONES.filter(function (q) { return new RegExp('\\b' + q.z + '\\b').test(it.d); });
+    if (!used.length) return '';
+    if (!zset()) return '<div class="zline"><span class="zh">Seus ritmos nesta corrida</span><button type="button" class="zlk" data-act="zones">Cadastrar meus ritmos de corrida</button></div>';
+    return '<div class="zline"><span class="zh">Seus ritmos nesta corrida</span>' + used.map(function (q) {
+      var v = store.zones[q.id];
+      return '<div class="zr"><b>' + q.z + ' · ' + q.n + '</b><span>' + (v ? zfmt(v) + ' /km' : 'não cadastrado') + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function zonesBtn() {
+    var sub = zset() ? ZONES.filter(function (q) { return store.zones[q.id]; }).map(function (q) { return q.z + ' ' + store.zones[q.id][0]; }).join(' · ') : 'Para lembrar o ritmo de cada corrida';
+    return '<button type="button" class="zbtn" data-act="zones"><span class="zi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></svg></span><span><b>' + (zset() ? 'Meus ritmos de corrida' : 'Cadastrar meus ritmos de corrida') + '</b><small>' + esc(sub) + '</small></span><span class="ar" aria-hidden="true">›</span></button>';
+  }
+  function renderZones(msg, bad) {
+    var h = '<div class="wrap"><button type="button" class="back" data-act="tab" data-v="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Calendário</button>' +
+      '<div class="ptitle"><h1>Meus ritmos</h1></div>';
+    h += '<section class="zhow"><h2>Como descobrir suas zonas</h2><ol>' +
+      '<li>Toque em <b>Abrir calculadora</b> (abre o site Trainerplan em outra aba).</li>' +
+      '<li>Em <b>Método</b>, escolha <b>5 zonas</b>.</li>' +
+      '<li>Em <b>Tipo de cálculo</b>, escolha <b>Velocidade/Limiar</b>.</li>' +
+      '<li>Em <b>Unidade de velocidade</b>, escolha <b>km</b>, e em <b>Unidade de ritmo</b>, <b>Ritmo (min/km)</b>.</li>' +
+      '<li>Digite o seu ritmo de limiar e toque em <b>Calcular Zonas de Ritmo</b>.</li>' +
+      '<li>Volte aqui e copie o ritmo de cada zona nos campos abaixo.</li></ol>' +
+      '<a class="zopen" href="' + ZSITE + '" target="_blank" rel="noopener">Abrir calculadora</a></section>';
+    h += '<section class="zform"><h2>Seus ritmos (min/km)</h2><p class="zs">Digite só os números: 410 vira 4:10. O cronograma usa a Z1 (Fácil) e a Z5 (Repetição).</p>';
+    ZONES.forEach(function (q) {
+      var v = store.zones[q.id] || ['', ''];
+      h += '<div class="zrow"><div class="zl"><b>' + q.z + ' · ' + q.n + '</b><small>de (mais lento) até (mais rápido)</small></div><div class="zi2">' +
+        '<input class="zin' + (bad && bad[q.id] ? ' bad' : '') + '" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="0:00" aria-label="' + q.z + ' ' + q.n + ' de" data-z="' + q.id + '" data-i="0" value="' + esc(v[0]) + '">' +
+        '<span aria-hidden="true">–</span>' +
+        '<input class="zin' + (bad && bad[q.id] ? ' bad' : '') + '" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="0:00" aria-label="' + q.z + ' ' + q.n + ' até" data-z="' + q.id + '" data-i="1" value="' + esc(v[1]) + '"></div></div>';
+    });
+    h += '<div class="zact"><button type="button" class="zsave" data-act="zsave">Salvar ritmos</button><button type="button" class="zclear" data-act="zclear">Limpar</button></div>' +
+      '<div class="zmsg' + (bad ? ' err' : '') + '" role="status">' + esc(msg || '') + '</div></section></div>';
+    view = 'zones'; el(h);
+  }
   function weekOf(s) { return Math.floor((parseISO(s) - parseISO(PLAN[0].date)) / 604800000) + 1; }
 
   function calInit() {
@@ -913,6 +991,7 @@ var FigEngine = (function () {
     var h = '<div class="wrap"><header class="top"><h1>Cronômetro CFP</h1></header>' + tabs('cal');
     h += '<div class="cprog"><b>' + nDone + ' de ' + total + ' treinos feitos</b><div class="meter" aria-hidden="true"><i style="width:' + Math.round(nDone / total * 100) + '%"></i></div>' +
       (late > 0 ? '<div class="late">' + late + (late === 1 ? ' treino atrasado' : ' treinos atrasados') + '</div>' : '') + '</div>';
+    h += zonesBtn();
     if (nxt) h += '<button type="button" class="nextbtn" data-act="sel" data-date="' + nxt.date + '"><small>Próximo treino</small><b>' + shortDate(nxt.date) + ' · ' + esc(itemTitle(nxt)) + '</b></button>';
     h += '<div class="chead"><button type="button" data-act="calnav" data-d="-1" aria-label="Mês anterior"' + (idx <= minI ? ' disabled' : '') + '>‹</button><h2>' + MESES[cal.m] + ' ' + cal.y + '</h2>' +
       '<button type="button" data-act="calnav" data-d="1" aria-label="Próximo mês"' + (idx >= maxI ? ' disabled' : '') + '>›</button></div>';
@@ -936,7 +1015,7 @@ var FigEngine = (function () {
     if (!its2.length) h += '<p class="rest" style="margin-top:8px">' + (sd.getDay() === 0 ? 'Domingo é dia de descanso.' : inPlan ? 'Sem treino previsto neste dia.' : 'Fora do cronograma.') + '</p>';
     its2.forEach(function (it) {
       var dn = !!store.done[it.id];
-      h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4>' + (it.k === 'cond' ? pickHtml(it) : '') + (it.k === 'barra' ? barList(it.d, it.t) : '<p>' + esc(itemDetail(it)) + '</p>') + '<div class="btns">' +
+      h += '<article class="sess ' + it.k + '"><div class="kind">' + KIND[it.k] + '</div><h4>' + esc(itemTitle(it)) + '</h4>' + (it.k === 'cond' ? pickHtml(it) : '') + (it.k === 'barra' ? barList(it.d, it.t) : '<p>' + esc(itemDetail(it)) + '</p>' + zoneLine(it)) + '<div class="btns">' +
         '<button type="button" class="mark' + (dn ? ' on' : '') + '" data-act="mark" data-id="' + it.id + '" aria-pressed="' + dn + '"><span class="box" aria-hidden="true">' + (dn ? '✓' : '') + '</span>' + (dn ? 'Feito · toque para desfazer' : 'Marcar como feito') + '</button>' +
         (it.k === 'cond' ? '<button type="button" class="openp" data-act="open" data-from="cal" data-id="' + effPr(it) + '">Abrir programa e cronômetro</button>' : '') +
         (it.k === 'barra' ? '<button type="button" class="openp" data-act="openbar" data-from="cal" data-t="' + esc(it.t) + '">Abrir treino e cronômetro</button>' : '') + '</div></article>';
@@ -1381,11 +1460,27 @@ var FigEngine = (function () {
   }
 
   /* ---------- Eventos ---------- */
+  app.addEventListener('input', function (e) {
+    var t = e.target; if (!t.classList || !t.classList.contains('zin')) return;
+    var d = t.value.replace(/\D/g, '').slice(0, 4); t.value = d.length > 2 ? d.slice(0, -2) + ':' + d.slice(-2) : d; t.classList.remove('bad');
+  });
   app.addEventListener('click', function (e) {
     var b = e.target.closest('[data-act]'); if (!b) return;
     var act = b.getAttribute('data-act');
     if (act === 'openbar') { curBar = b.getAttribute('data-t'); from = b.getAttribute('data-from') || 'home'; view = 'bar'; renderBar(); window.scrollTo(0, 0); }
     else if (act === 'pick') { var pd = b.getAttribute('data-date'), pp = b.getAttribute('data-pr'), pit = (PLAN_BY[pd] || []).filter(function (x) { return x.k === 'cond'; })[0]; if (pit) { if (pp === pit.pr) delete store.alt[pd]; else store.alt[pd] = pp; save(); var py = window.scrollY; renderCal(); window.scrollTo(0, py); } }
+    else if (act === 'zones') { stopTimer(); renderZones(); window.scrollTo(0, 0); }
+    else if (act === 'zsave') {
+      var nz = {}, bad = {}, ok = true;
+      ZONES.forEach(function (q) {
+        var a = app.querySelector('[data-z="' + q.id + '"][data-i="0"]').value.trim(), c = app.querySelector('[data-z="' + q.id + '"][data-i="1"]').value.trim();
+        if (!a && !c) return;
+        if (/^\d{1,2}:[0-5]\d$/.test(a) && /^\d{1,2}:[0-5]\d$/.test(c)) nz[q.id] = [a, c]; else { bad[q.id] = true; ok = false; }
+      });
+      if (!ok) { store.zones = store.zones; var typed = {}; ZONES.forEach(function (q) { typed[q.id] = [app.querySelector('[data-z="' + q.id + '"][data-i="0"]').value, app.querySelector('[data-z="' + q.id + '"][data-i="1"]').value]; }); var keep = store.zones; store.zones = typed; renderZones('Confira os campos em vermelho: use o formato 4:10.', bad); store.zones = keep; }
+      else { store.zones = nz; save(); renderZones('Ritmos salvos. Eles aparecem nas corridas do calendário.'); }
+    }
+    else if (act === 'zclear') { store.zones = {}; save(); renderZones('Ritmos apagados.'); }
     else if (act === 'bstart') startBar();
     else if (act === 'bdone') { beep(1000, 0.08); buzz([30]); bAdvance(0); }
     else if (act === 'bpause') bToggle();
