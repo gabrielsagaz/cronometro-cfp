@@ -192,6 +192,15 @@ h1, h2, h3, p, ol, ul { margin: 0; }
 .zline button.zlk { text-align: left; background: none; border: 0; padding: 4px 0; font-weight: 600; text-decoration: underline; color: var(--ink); }
 .zhow { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
 .zhow h2, .zform h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.zhow p.zs { margin-top: 6px; font-size: 14px; line-height: 1.4; color: var(--muted); }
+.zcalc { margin-top: 14px; }
+.zcalc label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.zcr { display: grid; grid-template-columns: 96px 1fr; gap: 10px; }
+.zcr .zlim { width: 100%; font-size: 20px; }
+.zgo { min-height: 46px; border-radius: 10px; border: 0; background: var(--c-corr); color: #fff; font-weight: 700; }
+:root[data-theme="dark"] .zgo { color: #0B1013; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .zgo { color: #0B1013; } }
+.zalt { display: block; margin-top: 14px; font-size: 14px; color: var(--muted); text-decoration: underline; }
 .zhow ol { margin: 10px 0 0; padding-left: 22px; display: grid; gap: 8px; line-height: 1.35; }
 .zhow ol b { font-weight: 600; }
 .zopen { margin-top: 14px; display: flex; align-items: center; justify-content: center; min-height: 50px; border-radius: 10px; background: var(--c-corr); color: #fff; font-weight: 700; text-decoration: none; }
@@ -696,7 +705,7 @@ var FigEngine = (function () {
   var app = document.getElementById('app');
   var live = document.getElementById('live');
   var KEY = 'cfp-cronometro-v1';
-  var store = { cfg: {}, prefs: { sound: true, voice: true }, done: {}, alt: {}, zones: {} };
+  var store = { cfg: {}, prefs: { sound: true, voice: true }, done: {}, alt: {}, zones: {}, lim: '' };
   try {
     var s0 = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (s0 && typeof s0 === 'object') {
@@ -705,6 +714,7 @@ var FigEngine = (function () {
       store.done = s0.done || {};
       store.alt = s0.alt || {};
       store.zones = s0.zones || {};
+      store.lim = s0.lim || '';
     }
   } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
@@ -922,7 +932,9 @@ var FigEngine = (function () {
       }).join('') + '</div></div>';
   }
   /* ---------- Zonas de ritmo (corrida) ---------- */
-  var ZONES = [{ id: 'z1', z: 'Z1', n: 'Fácil' }, { id: 'z2', z: 'Z2', n: 'Maratona' }, { id: 'z3', z: 'Z3', n: 'Umbral' }, { id: 'z4', z: 'Z4', n: 'Intervalo' }, { id: 'z5', z: 'Z5', n: 'Repetição' }];
+  var ZONES = [{ id: 'z1', z: 'Z1', n: 'Fácil', a: 120, b: 140 }, { id: 'z2', z: 'Z2', n: 'Maratona', a: 100, b: 110 }, { id: 'z3', z: 'Z3', n: 'Umbral', a: 95, b: 105 }, { id: 'z4', z: 'Z4', n: 'Intervalo', a: 85, b: 95 }, { id: 'z5', z: 'Z5', n: 'Repetição', a: 75, b: 85 }];
+  function mmss(t) { t = Math.round(t); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
+  function calcZones(sec) { var o = {}; ZONES.forEach(function (q) { o[q.id] = [mmss(sec * q.a / 100), mmss(sec * q.b / 100)]; }); return o; }
   var ZSITE = 'https://trainerplan.co/pt/zone-pace-calculator/';
   function zset() { return ZONES.some(function (q) { return store.zones[q.id]; }); }
   function zfmt(v) { return v ? v[0] + ' – ' + v[1] : ''; }
@@ -943,15 +955,10 @@ var FigEngine = (function () {
   function renderZones(msg, bad) {
     var h = '<div class="wrap"><button type="button" class="back" data-act="tab" data-v="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Calendário</button>' +
       '<div class="ptitle"><h1>Meus ritmos</h1></div>';
-    h += '<section class="zhow"><h2>Como descobrir suas zonas</h2><ol>' +
-      '<li>Toque em <b>Abrir calculadora</b> (abre o site Trainerplan em outra aba).</li>' +
-      '<li>Em <b>Método</b>, escolha <b>5 zonas</b>.</li>' +
-      '<li>Em <b>Tipo de cálculo</b>, escolha <b>Velocidade/Limiar</b>.</li>' +
-      '<li>Em <b>Unidade de velocidade</b>, escolha <b>km</b>, e em <b>Unidade de ritmo</b>, <b>Ritmo (min/km)</b>.</li>' +
-      '<li>Digite o seu ritmo de limiar e toque em <b>Calcular Zonas de Ritmo</b>.</li>' +
-      '<li>Volte aqui e copie o ritmo de cada zona nos campos abaixo.</li></ol>' +
-      '<a class="zopen" href="' + ZSITE + '" target="_blank" rel="noopener">Abrir calculadora</a></section>';
-    h += '<section class="zform"><h2>Seus ritmos (min/km)</h2><p class="zs">Digite só os números: 410 vira 4:10. O cronograma usa a Z1 (Fácil) e a Z5 (Repetição).</p>';
+    h += '<section class="zhow"><h2>Calculadora de zonas</h2><p class="zs">Digite o seu ritmo de limiar e toque em calcular. O app preenche as 5 zonas, no mesmo método da calculadora da Trainerplan (5 zonas, velocidade/limiar, ritmo em min/km).</p>' +
+      '<div class="zcalc"><label for="zlim">Ritmo de limiar (min/km)</label><div class="zcr"><input id="zlim" class="zin zlim' + (bad && bad.lim ? ' bad' : '') + '" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="0:00" value="' + esc(store.lim || '') + '"><button type="button" class="zgo" data-act="zcalc">Calcular zonas</button></div></div>' +
+      '<a class="zalt" href="' + ZSITE + '" target="_blank" rel="noopener">Prefere o site? Abrir a calculadora da Trainerplan</a></section>';
+    h += '<section class="zform"><h2>Seus ritmos (min/km)</h2><p class="zs">Calculados pelo limiar. Se quiser, ajuste à mão (digite só os números: 410 vira 4:10) e toque em Salvar. O cronograma usa a Z1 (Fácil) e a Z5 (Repetição).</p>';
     ZONES.forEach(function (q) {
       var v = store.zones[q.id] || ['', ''];
       h += '<div class="zrow"><div class="zl"><b>' + q.z + ' · ' + q.n + '</b><small>de (mais lento) até (mais rápido)</small></div><div class="zi2">' +
@@ -1480,7 +1487,12 @@ var FigEngine = (function () {
       if (!ok) { store.zones = store.zones; var typed = {}; ZONES.forEach(function (q) { typed[q.id] = [app.querySelector('[data-z="' + q.id + '"][data-i="0"]').value, app.querySelector('[data-z="' + q.id + '"][data-i="1"]').value]; }); var keep = store.zones; store.zones = typed; renderZones('Confira os campos em vermelho: use o formato 4:10.', bad); store.zones = keep; }
       else { store.zones = nz; save(); renderZones('Ritmos salvos. Eles aparecem nas corridas do calendário.'); }
     }
-    else if (act === 'zclear') { store.zones = {}; save(); renderZones('Ritmos apagados.'); }
+    else if (act === 'zclear') { store.zones = {}; store.lim = ''; save(); renderZones('Ritmos apagados.'); }
+    else if (act === 'zcalc') {
+      var lv = app.querySelector('#zlim').value.trim(), lm = /^(\d{1,2}):([0-5]\d)$/.exec(lv), ls = lm ? (+lm[1]) * 60 + (+lm[2]) : 0;
+      if (!lm || ls < 150 || ls > 600) { var keepZ = store.zones, keepL = store.lim; store.lim = lv; renderZones('Digite o ritmo de limiar no formato 4:10 (entre 2:30 e 10:00).', { lim: true }); store.lim = keepL; store.zones = keepZ; }
+      else { store.lim = lv; store.zones = calcZones(ls); save(); renderZones('Zonas calculadas e salvas. Elas já aparecem nas corridas do calendário.'); }
+    }
     else if (act === 'bstart') startBar();
     else if (act === 'bdone') { beep(1000, 0.08); buzz([30]); bAdvance(0); }
     else if (act === 'bpause') bToggle();
