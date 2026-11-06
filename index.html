@@ -187,7 +187,8 @@ h1, h2, h3, p, ol, ul { margin: 0; }
 .zline { display: grid; gap: 6px; padding: 10px 12px; border-radius: 10px; background: var(--chip); }
 .zline .zr { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 15px; }
 .zline .zr b { font-weight: 700; }
-.zline .zr span { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--c-corr); }
+.zline .zr b small { display: block; font-size: 12px; font-weight: 500; color: var(--muted); }
+.zline .zr span { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--c-corr); white-space: nowrap; }
 .zline .zh { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
 .zline button.zlk { text-align: left; background: none; border: 0; padding: 4px 0; font-weight: 600; text-decoration: underline; color: var(--ink); }
 .zhow { margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
@@ -941,11 +942,15 @@ var FigEngine = (function () {
   function zoneLine(it) {
     if (it.k !== 'corrida') return '';
     var used = ZONES.filter(function (q) { return new RegExp('\\b' + q.z + '\\b').test(it.d); });
+    var tiro = /Z1/.test(it.d) && !/Z5/.test(it.d) && !/trote/i.test(it.d);
+    if (tiro && !used.some(function (q) { return q.id === 'z5'; })) used.push(ZONES[4]);
     if (!used.length) return '';
+    var temZ5 = used.some(function (q) { return q.id === 'z5'; }), rec = /\dx[^+]*\(Z1\)/i.test(it.d);
+    function papel(q) { return !temZ5 ? '' : q.id === 'z5' ? 'tiros' : (rec ? 'aquecimento, recuperação e desaquecimento' : 'aquecimento e desaquecimento'); }
     if (!zset()) return '<div class="zline"><span class="zh">Seus ritmos nesta corrida</span><button type="button" class="zlk" data-act="zones">Cadastrar meus ritmos de corrida</button></div>';
     return '<div class="zline"><span class="zh">Seus ritmos nesta corrida</span>' + used.map(function (q) {
-      var v = store.zones[q.id];
-      return '<div class="zr"><b>' + q.z + ' · ' + q.n + '</b><span>' + (v ? zfmt(v) + ' /km' : 'não cadastrado') + '</span></div>';
+      var v = store.zones[q.id], pp = papel(q);
+      return '<div class="zr"><b>' + q.z + ' · ' + q.n + (pp ? '<small>' + pp + '</small>' : '') + '</b><span>' + (v ? zfmt(v) + ' /km' : 'não cadastrado') + '</span></div>';
     }).join('') + '</div>';
   }
   function zonesBtn() {
