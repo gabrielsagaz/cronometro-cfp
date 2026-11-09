@@ -255,6 +255,8 @@ h1, h2, h3, p, ol, ul { margin: 0; }
 .items li:first-child { border-top: 0; }
 .it { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; color: #fff; padding: 5px 6px; min-height: 56px; font-size: 20px; font-weight: 600; }
 .it .t { min-width: 0; flex: 1; }
+.vid { display: flex; width: fit-content; align-items: center; gap: 6px; min-height: 36px; margin: 6px 10px 0 0; padding: 0 12px; border-radius: 18px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); font-size: 13px; font-weight: 600; text-decoration: none; }
+.vid span { color: #D93025; font-size: 11px; }
 .dica { display: block; font-size: 13px; font-weight: 500; line-height: 1.25; margin-top: 2px; opacity: .85; }
 .it.now { background: #fff; color: var(--ph); }
 .it.ok { opacity: .55; }
@@ -774,7 +776,10 @@ var FigEngine = (function () {
     return Math.floor(v / 60) + ':' + pad(v % 60) + ' min';
   }
   function fmtClock(sec) { sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec / 60) + ':' + pad(sec % 60); }
-  function dicaOf(x) { return (typeof FIGS !== 'undefined' && FIGS[x.k] && FIGS[x.k].dica) ? '<small class="dica">' + esc(FIGS[x.k].dica) + '</small>' : ''; }
+  /* vídeos do YouTube com pessoas executando cada exercício */
+  var VID = { agach: 'XI-4buHz7Xo', salto: '5HqB1xSgmpQ', jj: 'l-60Ky-FJf4', frogger: 'OS3riLpt0G0', skip: 'MKlVqYZ2q50', mc: 'DTVVwQs-zoM', prancha: '39v8Wz4CYuI', plD: 'IxygSMWpFIw', plE: 'IxygSMWpFIw', 'super': '_kY519rZBR4', ponte: 'T2i-N2kkz3E', rosca: 'A-PgnsVCaHU', martelo: '3c7lxBBzhKw', infra: 'a_AoVz1RD-Q', remador: 'pNRpcChQmq0', flexao: 'Azw6BZ8-wSM', burpee: 'sufNt41jceQ', barra: 'R9hSiG_U9GE', isom: 'e9ciUzCwv2M', negativa: 'qDsLpVbd-wA', assist: 'zSuNm2EVaL8', remInv: 'IlACDC27Vxs', roscaB: '0_V6aL_hx88' };
+  function vidOf(k, lab) { return VID[k] ? '<a class="vid" href="https://www.youtube.com/watch?v=' + VID[k] + '" target="_blank" rel="noopener"><span aria-hidden="true">▶</span> ' + esc(lab || 'Ver vídeo') + '</a>' : ''; }
+  function dicaOf(x) { return ((typeof FIGS !== 'undefined' && FIGS[x.k] && FIGS[x.k].dica) ? '<small class="dica">' + esc(FIGS[x.k].dica) + '</small>' : '') + vidOf(x.k); }
   function repsWord(p, n) { return p.kind === 'circuit' ? (n === 1 ? 'série' : 'séries') : (n === 1 ? 'volta' : 'voltas'); }
 
   function howTo(p, c) {
@@ -923,7 +928,7 @@ var FigEngine = (function () {
       if (e && !e.mob) { var r = barRow(part, e, real.indexOf(e) === real.length - 1); main = r.name; rs = r.lines.map(function (l) { return '<small class="rs">' + esc(l) + '</small>'; }).join(''); }
       else main = part;
       return '<li' + (ks.length ? '' : ' class="nofig"') + '>' + (ks.length ? '<span class="ths">' + ks.map(function (k) { return '<span class="th" data-fig="' + k + '" role="img" aria-label="' + esc(FIGS[k].nome) + '"></span>'; }).join('') + '</span>' : '') +
-        '<span class="tx">' + esc(main) + rs + (tip ? '<small>' + esc(tip) + '</small>' : '') + '</span></li>';
+        '<span class="tx">' + esc(main) + rs + (tip ? '<small>' + esc(tip) + '</small>' : '') + ks.map(function (k) { return vidOf(k, ks.length > 1 ? 'Vídeo: ' + FIGS[k].nome : ''); }).join('') + '</span></li>';
     }).join('') + '</ul>';
   }
   function pickHtml(it) {
